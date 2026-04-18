@@ -2,12 +2,6 @@ package com.example.aventurahelena;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -61,9 +55,7 @@ public class HubActivity extends Activity {
 
         perfil = new PerfilHelena(this);
 
-        // Avatar circular com borda dourada (Java puro, sem libs externas)
-        ImageView ivAvatar = (ImageView) findViewById(R.id.iv_avatar);
-        aplicarAvatarCircular(ivAvatar);
+        // Avatar carregado direto pelo XML (sem recorte)
 
         // Referências às views do perfil
         tvNivel   = (TextView)    findViewById(R.id.tv_nivel);
@@ -272,50 +264,4 @@ public class HubActivity extends Activity {
         return super.onKeyDown(keyCode, event);
     }
 
-    /**
-     * Carrega helena_avatar.png, aplica máscara circular e borda dourada
-     * usando apenas Canvas + PorterDuff (sem bibliotecas externas).
-     * Funciona em todas as versões do Android.
-     */
-    private void aplicarAvatarCircular(ImageView iv) {
-        try {
-            Bitmap original = BitmapFactory.decodeResource(getResources(), R.drawable.helena_avatar);
-            if (original == null) return;
-
-            int size = Math.min(original.getWidth(), original.getHeight());
-            int borderPx = 10; // borda dourada em pixels do bitmap
-
-            // Cria bitmap de saída quadrado
-            Bitmap output = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(output);
-
-            float cx = size / 2f;
-            float cy = size / 2f;
-            float raio = size / 2f;
-
-            // 1) Desenha o círculo de borda dourada
-            Paint bordaPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            bordaPaint.setColor(0xFFFFD700); // gold
-            canvas.drawCircle(cx, cy, raio, bordaPaint);
-
-            // 2) Máscara para a imagem (ligeiramente menor, deixando a borda visível)
-            Paint maskPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            canvas.drawCircle(cx, cy, raio - borderPx, maskPaint);
-
-            // 3) Aplica a imagem dentro da máscara
-            Paint imgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            imgPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-
-            // Centraliza o bitmap original no quadrado
-            float offsetX = (original.getWidth()  - size) / 2f;
-            float offsetY = (original.getHeight() - size) / 2f;
-            canvas.drawBitmap(original, -offsetX, -offsetY, imgPaint);
-
-            iv.setImageBitmap(output);
-            original.recycle();
-
-        } catch (Exception e) {
-            // Falha silenciosa — mantém o ImageView vazio
-        }
-    }
 }
