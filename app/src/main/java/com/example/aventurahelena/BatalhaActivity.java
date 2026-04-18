@@ -17,34 +17,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * BatalhaActivity — Batalha Final em duas fases.
- *
- * FASE 1: Jogo da Memória com 3 pares (6 cartas em grade 3x2).
- *   - Acertar um par  → Bruxo perde 1 HP
- *   - Errar um par    → Helena perde 1 HP
- *
- * FASE 2: Complete a Palavra com 3 perguntas.
- *   - Acertar         → Bruxo perde 1 HP
- *   - Errar           → Helena perde 1 HP
- *
- * Se HP de algum lado chegar a 0 antes do fim → termina imediatamente.
- * Caso contrário, quem tiver mais HP ao final vence.
- *
- * HP inicial de ambos: 3
- */
 public class BatalhaActivity extends Activity {
 
     private static final int HP_MAX = 3;
 
-    // ── EMOJIS para a fase de memória (apenas 3 pares) ──
     private static final String[] EMOJIS_BATALHA = {
-        "\u2B50",         // ⭐
-        "\uD83C\uDF08",   // 🌈
-        "\uD83D\uDC31"    // 🐱
+        "\u2B50", "\uD83C\uDF08", "\uD83D\uDC31"
     };
 
-    // ── Banco de palavras para a fase 2 (sorteia 3) ──
     private static final String[][] BANCO_PALAVRAS = {
         {"G_TO",   "Animal que mia",     "GATO",  "PATO",  "RATO",  "BOLO",  "0"},
         {"C_SA",   "Onde moramos",       "BASA",  "CASA",  "MADA",  "FASA",  "1"},
@@ -58,12 +38,10 @@ public class BatalhaActivity extends Activity {
         {"FL_R",   "Planta bonita",      "FLOU",  "FLOX",  "FLON",  "FLOR",  "3"},
     };
 
-    // ── Estado da batalha ──
     private int hpHelena   = HP_MAX;
     private int hpInimigo  = HP_MAX;
-    private int fase = 1; // 1 = memória, 2 = palavras
+    private int fase = 1;
 
-    // ── Views ──
     private TextView tvHpHelena;
     private TextView tvHpInimigo;
     private TextView tvFase;
@@ -74,11 +52,10 @@ public class BatalhaActivity extends Activity {
     private TextView tvPalavraBatalha;
     private Button[] btnBat;
 
-    // ── Fase 1: Memória ──
     private static final int TOTAL_CARTAS_BAT  = 6;
     private static final int COLUNAS_BAT       = 3;
     private static final int TOTAL_PARES_BAT   = 3;
-    private static final int DELAY_FECHAR      = 900;
+    private static final int DELAY_FECHAR      = 950;
 
     private List<Integer> listaValoresBat;
     private Button[] botoesBat;
@@ -89,14 +66,14 @@ public class BatalhaActivity extends Activity {
     private boolean bloqueadoBat = false;
     private int indiceFocadoBat = 0;
 
-    // ── Fase 2: Palavras ──
-    private List<Integer> indicesPalavras; // índices sortidos do BANCO_PALAVRAS
+    private List<Integer> indicesPalavras;
     private int perguntaAtualBat = 0;
     private boolean aguardandoProximaBat = false;
     private int opcaoFocadaBat = 0;
 
     private Handler handler;
     private PerfilHelena perfil;
+    private SoundManager sound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,18 +82,17 @@ public class BatalhaActivity extends Activity {
 
         perfil  = new PerfilHelena(this);
         handler = new Handler();
+        sound   = new SoundManager();
 
-        // Views do cabeçalho
         tvHpHelena  = (TextView) findViewById(R.id.tv_hp_helena);
         tvHpInimigo = (TextView) findViewById(R.id.tv_hp_inimigo);
         tvFase      = (TextView) findViewById(R.id.tv_fase);
         tvResultado = (TextView) findViewById(R.id.tv_resultado_batalha);
 
-        // Views das fases
-        gridBatalha      = (GridLayout)    findViewById(R.id.grid_batalha);
-        llPalavrasBatalha = (LinearLayout) findViewById(R.id.ll_palavras_batalha);
-        tvPerguntaBatalha = (TextView)     findViewById(R.id.tv_pergunta_batalha);
-        tvPalavraBatalha  = (TextView)     findViewById(R.id.tv_palavra_batalha);
+        gridBatalha       = (GridLayout)    findViewById(R.id.grid_batalha);
+        llPalavrasBatalha = (LinearLayout)  findViewById(R.id.ll_palavras_batalha);
+        tvPerguntaBatalha = (TextView)      findViewById(R.id.tv_pergunta_batalha);
+        tvPalavraBatalha  = (TextView)      findViewById(R.id.tv_palavra_batalha);
 
         btnBat = new Button[]{
             (Button) findViewById(R.id.btn_bat0),
@@ -125,7 +101,6 @@ public class BatalhaActivity extends Activity {
             (Button) findViewById(R.id.btn_bat3)
         };
 
-        // Configura os botões de resposta da fase 2
         for (int i = 0; i < 4; i++) {
             final int idx = i;
             btnBat[i].setOnClickListener(new View.OnClickListener() {
@@ -142,17 +117,31 @@ public class BatalhaActivity extends Activity {
             });
         }
 
-        // Sorteia 3 perguntas para a fase 2
         indicesPalavras = new ArrayList<Integer>();
         for (int i = 0; i < BANCO_PALAVRAS.length; i++) indicesPalavras.add(i);
         Collections.shuffle(indicesPalavras);
-        // Mantém apenas os 3 primeiros
         while (indicesPalavras.size() > 3) {
             indicesPalavras.remove(indicesPalavras.size() - 1);
         }
 
         atualizarHP();
-        iniciarFase1();
+
+        // Animação e som de início de batalha
+        AnimHelper.celebracao(tvFase);
+        sound.playBatalhaInicio();
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                iniciarFase1();
+            }
+        }, 600);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        sound.release();
     }
 
     // ════════════════════════════════════════════
@@ -167,7 +156,6 @@ public class BatalhaActivity extends Activity {
         gridBatalha.setVisibility(View.VISIBLE);
         llPalavrasBatalha.setVisibility(View.GONE);
 
-        // Cria e embaralha as cartas (3 pares)
         listaValoresBat = new ArrayList<Integer>();
         for (int i = 0; i < TOTAL_PARES_BAT; i++) {
             listaValoresBat.add(i);
@@ -175,7 +163,6 @@ public class BatalhaActivity extends Activity {
         }
         Collections.shuffle(listaValoresBat);
 
-        // Limpa o grid e cria os botões
         gridBatalha.removeAllViews();
         botoesBat = new Button[TOTAL_CARTAS_BAT];
 
@@ -211,6 +198,9 @@ public class BatalhaActivity extends Activity {
             params.setMargins(10, 10, 10, 10);
             btn.setLayoutParams(params);
 
+            // Cartas entram escalonadas
+            AnimHelper.zoomEntrada(btn, i * 80);
+
             gridBatalha.addView(btn);
             botoesBat[i] = btn;
         }
@@ -224,15 +214,29 @@ public class BatalhaActivity extends Activity {
         if (!botoesBat[indice].isEnabled()) return;
         if (!"?".equals(botoesBat[indice].getText().toString())) return;
 
-        int valor = listaValoresBat.get(indice);
-        botoesBat[indice].setText(EMOJIS_BATALHA[valor]);
+        final int valor  = listaValoresBat.get(indice);
+        final Button btn = botoesBat[indice];
+
+        // Som + flip
+        sound.playCartaVirou();
+        AnimHelper.flipCarta(btn, new AnimHelper.OnHalfFlip() {
+            @Override
+            public void onHalf() {
+                btn.setText(EMOJIS_BATALHA[valor]);
+            }
+        });
 
         if (primeiraBat == -1) {
             primeiraBat = indice;
         } else {
             segundaBat = indice;
             bloqueadoBat = true;
-            verificarParBatalha();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    verificarParBatalha();
+                }
+            }, 380);
         }
     }
 
@@ -246,46 +250,63 @@ public class BatalhaActivity extends Activity {
         segundaBat  = -1;
 
         if (val1 == val2) {
-            // Par certo → Bruxo perde HP
-            botoesBat[idx1].setEnabled(false);
-            botoesBat[idx2].setEnabled(false);
-            paresEncontradosBat++;
-            bloqueadoBat = false;
+            // Par certo → pulso + som + dano no bruxo
+            sound.playAcerto();
+            AnimHelper.pulseGold(botoesBat[idx1]);
+            AnimHelper.pulseGold(botoesBat[idx2]);
 
-            causarDano(false); // false = dano no inimigo
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    botoesBat[idx1].setEnabled(false);
+                    botoesBat[idx2].setEnabled(false);
+                    paresEncontradosBat++;
+                    bloqueadoBat = false;
 
-            if (hpInimigo <= 0) {
-                // Inimigo derrotado na fase 1 → vitória imediata
-                finalizarBatalha(true);
-                return;
-            }
+                    causarDano(false);
 
-            if (paresEncontradosBat == TOTAL_PARES_BAT) {
-                // Todos os pares encontrados → avança para fase 2
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        iniciarFase2();
+                    if (hpInimigo <= 0) {
+                        finalizarBatalha(true);
+                        return;
                     }
-                }, 800);
-            }
+
+                    if (paresEncontradosBat == TOTAL_PARES_BAT) {
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                iniciarFase2();
+                            }
+                        }, 800);
+                    }
+                }
+            }, 220);
 
         } else {
-            // Par errado → Helena perde HP
-            errosBat++;
-            causarDano(true); // true = dano na Helena
+            // Par errado → shake + som + dano na Helena
+            sound.playErro();
+            AnimHelper.shake(botoesBat[idx1]);
+            AnimHelper.shake(botoesBat[idx2]);
+            AnimHelper.flashRed(tvHpHelena);
+
+            causarDano(true);
 
             if (hpHelena <= 0) {
-                // Helena derrotada na fase 1 → derrota imediata
-                finalizarBatalha(false);
+                handler.postDelayed(new Runnable() {
+                    @Override public void run() { finalizarBatalha(false); }
+                }, 500);
                 return;
             }
 
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    botoesBat[idx1].setText("?");
-                    botoesBat[idx2].setText("?");
+                    // Flip de volta
+                    AnimHelper.flipCarta(botoesBat[idx1], new AnimHelper.OnHalfFlip() {
+                        @Override public void onHalf() { botoesBat[idx1].setText("?"); }
+                    });
+                    AnimHelper.flipCarta(botoesBat[idx2], new AnimHelper.OnHalfFlip() {
+                        @Override public void onHalf() { botoesBat[idx2].setText("?"); }
+                    });
                     bloqueadoBat = false;
                 }
             }, DELAY_FECHAR);
@@ -301,15 +322,19 @@ public class BatalhaActivity extends Activity {
         perguntaAtualBat = 0;
         tvFase.setText("FASE 2\nPalavras");
 
+        // Animação de transição de fase
+        AnimHelper.celebracao(tvFase);
+        sound.playBatalhaInicio();
+
         gridBatalha.setVisibility(View.GONE);
         llPalavrasBatalha.setVisibility(View.VISIBLE);
+        AnimHelper.fadeIn(llPalavrasBatalha, 300);
 
         mostrarPerguntaBatalha();
     }
 
     private void mostrarPerguntaBatalha() {
         if (perguntaAtualBat >= indicesPalavras.size()) {
-            // Fase 2 concluída — define resultado por HP
             finalizarBatalha(hpHelena > hpInimigo);
             return;
         }
@@ -323,18 +348,22 @@ public class BatalhaActivity extends Activity {
         String lacuna = dados[0];
         StringBuilder sb = new StringBuilder();
         for (char c : lacuna.toCharArray()) {
-            if (sb.length() > 0) sb.append(" ");
+            if (sb.length() > 0) sb.append("  ");
             sb.append(c);
         }
 
         tvPerguntaBatalha.setText("Pergunta " + (perguntaAtualBat + 1) + " de 3");
         tvPalavraBatalha.setText(sb.toString());
-        tvResultado.setText(dados[1]); // Dica
+        tvResultado.setText(dados[1]);
+        tvResultado.setTextColor(0xFFCE93D8);
+
+        AnimHelper.fadeIn(tvPalavraBatalha, 250);
 
         for (int i = 0; i < 4; i++) {
             btnBat[i].setText(dados[2 + i]);
             btnBat[i].setEnabled(true);
             btnBat[i].setTextColor(0xFFFFFFFF);
+            AnimHelper.zoomEntrada(btnBat[i], i * 60);
         }
 
         btnBat[0].requestFocus();
@@ -351,21 +380,37 @@ public class BatalhaActivity extends Activity {
         aguardandoProximaBat = true;
 
         if (opcaoEscolhida == correta) {
-            tvResultado.setText("Correto! Bruxo leva 1 de dano!");
+            tvResultado.setText("\u2694 Correto! Bruxo leva 1 de dano!");
             tvResultado.setTextColor(0xFF4CAF50);
-            causarDano(false); // dano no inimigo
+
+            sound.playAcerto();
+            AnimHelper.pulseGold(btnBat[opcaoEscolhida]);
+            AnimHelper.pulseGold(tvPalavraBatalha);
+
+            causarDano(false);
+            AnimHelper.flashRed(tvHpInimigo);
 
             if (hpInimigo <= 0) {
-                finalizarBatalha(true);
+                handler.postDelayed(new Runnable() {
+                    @Override public void run() { finalizarBatalha(true); }
+                }, 600);
                 return;
             }
         } else {
-            tvResultado.setText("Errado! Helena leva 1 de dano! Era: " + dados[2 + correta]);
+            tvResultado.setText("\uD83D\uDCA5 Errado! Helena leva 1 de dano! Era: " + dados[2 + correta]);
             tvResultado.setTextColor(0xFFEF5350);
-            causarDano(true); // dano na Helena
+
+            sound.playErro();
+            AnimHelper.shake(tvPalavraBatalha);
+            AnimHelper.flashRed(btnBat[opcaoEscolhida]);
+
+            causarDano(true);
+            AnimHelper.flashRed(tvHpHelena);
 
             if (hpHelena <= 0) {
-                finalizarBatalha(false);
+                handler.postDelayed(new Runnable() {
+                    @Override public void run() { finalizarBatalha(false); }
+                }, 600);
                 return;
             }
         }
@@ -384,15 +429,13 @@ public class BatalhaActivity extends Activity {
     // HP e RESULTADO
     // ════════════════════════════════════════════
 
-    /**
-     * Causa 1 de dano em Helena (helenaTomaDano=true) ou no Bruxo (false).
-     */
     private void causarDano(boolean helenaTomaDano) {
         if (helenaTomaDano) {
             hpHelena = Math.max(0, hpHelena - 1);
         } else {
             hpInimigo = Math.max(0, hpInimigo - 1);
         }
+        sound.playDano(helenaTomaDano);
         atualizarHP();
     }
 
@@ -404,24 +447,32 @@ public class BatalhaActivity extends Activity {
         tvHpInimigo.setTextColor(hpInimigo <= 1 ? 0xFFEF5350 : 0xFF4CAF50);
     }
 
-    /**
-     * Finaliza a batalha, salva o resultado e mostra o diálogo.
-     */
     private void finalizarBatalha(final boolean helenaGanhou) {
-        // Bloqueia interações
         bloqueadoBat = true;
         aguardandoProximaBat = true;
 
-        // Salva o resultado
         if (helenaGanhou) {
             perfil.setBatalhaStatus("ganhou");
             perfil.addXP(100);
             perfil.addStatInteligencia(5);
             perfil.addStatFoco(5);
             perfil.addStatResponsabilidade(5);
+
+            // Som de vitória
+            sound.playVitoria();
+            handler.postDelayed(new Runnable() {
+                @Override public void run() { sound.playNivelUp(); }
+            }, 800);
+            AnimHelper.celebracao(tvResultado);
         } else {
             perfil.setBatalhaStatus("perdeu");
+            sound.playDerrota();
         }
+
+        tvResultado.setText(helenaGanhou
+            ? "\uD83C\uDFC6 VITORIA! Bruxo derrotado!"
+            : "\uD83D\uDCA4 Derrota... tente amanha!");
+        tvResultado.setTextColor(helenaGanhou ? 0xFFFFD700 : 0xFFEF5350);
 
         String titulo = helenaGanhou ? "VITORIA!" : "Que pena...";
         String mensagem;
@@ -438,23 +489,8 @@ public class BatalhaActivity extends Activity {
                 + "Bruxo: " + hpInimigo + "/" + HP_MAX + " HP restante";
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(titulo);
-        builder.setMessage(mensagem);
-        builder.setCancelable(false);
-
-        builder.setNegativeButton("Voltar ao Hub", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                finish();
-            }
-        });
-
-        // Pequeno delay para mostrar o resultado na tela antes do diálogo
-        final String tituloFinal = titulo;
+        final String tituloFinal   = titulo;
         final String mensagemFinal = mensagem;
-        tvResultado.setText(helenaGanhou ? "VITORIA! Bruxo derrotado!" : "Derrota... tente amanha!");
-        tvResultado.setTextColor(helenaGanhou ? 0xFFFFD700 : 0xFFEF5350);
 
         handler.postDelayed(new Runnable() {
             @Override
@@ -473,7 +509,7 @@ public class BatalhaActivity extends Activity {
                     b.show();
                 }
             }
-        }, 1500);
+        }, 1600);
     }
 
     // ════════════════════════════════════════════
