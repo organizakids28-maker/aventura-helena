@@ -15,45 +15,28 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * MemoriaActivity — Jogo da Memória com emojis para a Aventura da Helena.
- *
- * Grade 4x6 com 24 cartas (12 pares).
- * Ao completar: ganha XP, sobe stat de Inteligência e Foco, e marca o mini-jogo como concluído.
- *
- * Navegação D-pad:
- * - Setas: movem o foco entre cartas
- * - OK/Enter: vira a carta selecionada
- * - Voltar: sai do jogo (volta ao hub)
- */
 public class MemoriaActivity extends Activity {
 
     private static final int TOTAL_CARTAS = 24;
     private static final int COLUNAS = 6;
     private static final int LINHAS  = 4;
     private static final int TOTAL_PARES = 12;
-    private static final int DELAY_FECHAR = 1000;
+    private static final int DELAY_FECHAR = 1100;
 
-    // XP e stats ganhos ao completar
-    private static final int XP_GANHO = 60;
+    private static final int XP_GANHO       = 60;
     private static final int STAT_INT_GANHO = 3;
     private static final int STAT_FOC_GANHO = 3;
 
-    // 12 pares de emojis divertidos para crianças
     private static final String[] EMOJIS = {
-        "\u2B50", // ⭐
-        "\uD83C\uDF08", // 🌈
-        "\uD83D\uDC31", // 🐱
-        "\uD83D\uDC36", // 🐶
-        "\uD83D\uDC38", // 🐸
-        "\uD83E\uDD84", // 🦄
-        "\uD83C\uDF79", // 🎵 (actually 🎹)
-        "\uD83C\uDF80", // 🎀
-        "\uD83C\uDF55", // 🍕
-        "\uD83C\uDF6D", // 🍭
-        "\uD83C\uDFF5", // 🌺
-        "\uD83C\uDFC6"  // 🏆
+        "\u2B50", "\uD83C\uDF08", "\uD83D\uDC31", "\uD83D\uDC36",
+        "\uD83D\uDC38", "\uD83E\uDD84", "\uD83C\uDF79", "\uD83C\uDF80",
+        "\uD83C\uDF55", "\uD83C\uDF6D", "\uD83C\uDFF5", "\uD83C\uDFC6"
     };
+
+    private static final int COR_CARTA_FECHADA = 0xFF4A148C;
+    private static final int COR_CARTA_ABERTA  = 0xFF1565C0;
+    private static final int COR_PAR_CORRETO   = 0xFF2E7D32;
+    private static final int COR_PAR_ERRADO    = 0xFFB71C1C;
 
     private List<Integer> listaValores;
     private Button[] botoes;
@@ -66,6 +49,7 @@ public class MemoriaActivity extends Activity {
     private int indiceFocado = 0;
 
     private PerfilHelena perfil;
+    private SoundManager sound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +58,8 @@ public class MemoriaActivity extends Activity {
 
         perfil  = new PerfilHelena(this);
         handler = new Handler();
+        sound   = new SoundManager();
+
         tvPlacar = (TextView) findViewById(R.id.tv_placar);
 
         TextView tvTitulo = (TextView) findViewById(R.id.tv_titulo_memoria);
@@ -84,11 +70,18 @@ public class MemoriaActivity extends Activity {
         atualizarPlacar();
 
         botoes[indiceFocado].requestFocus();
+
+        // Animação de entrada: cartas aparecem com fade
+        GridLayout grid = (GridLayout) findViewById(R.id.grid_cartas);
+        AnimHelper.fadeIn(grid, 400);
     }
 
-    /**
-     * Cria os 12 pares (cada emoji aparece 2 vezes) e embaralha.
-     */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        sound.release();
+    }
+
     private void inicializarCartas() {
         listaValores = new ArrayList<Integer>();
         for (int i = 0; i < TOTAL_PARES; i++) {
@@ -98,9 +91,6 @@ public class MemoriaActivity extends Activity {
         Collections.shuffle(listaValores);
     }
 
-    /**
-     * Cria os 24 botões no GridLayout, um por carta.
-     */
     private void criarBotoes() {
         GridLayout grid = (GridLayout) findViewById(R.id.grid_cartas);
         botoes = new Button[TOTAL_CARTAS];
@@ -145,9 +135,6 @@ public class MemoriaActivity extends Activity {
         }
     }
 
-    /**
-     * Navegação pelo controle remoto.
-     */
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         int novoIndice = indiceFocado;
@@ -157,31 +144,25 @@ public class MemoriaActivity extends Activity {
                 if ((indiceFocado % COLUNAS) < COLUNAS - 1)
                     novoIndice = indiceFocado + 1;
                 break;
-
             case KeyEvent.KEYCODE_DPAD_LEFT:
                 if ((indiceFocado % COLUNAS) > 0)
                     novoIndice = indiceFocado - 1;
                 break;
-
             case KeyEvent.KEYCODE_DPAD_DOWN:
                 if (indiceFocado + COLUNAS < TOTAL_CARTAS)
                     novoIndice = indiceFocado + COLUNAS;
                 break;
-
             case KeyEvent.KEYCODE_DPAD_UP:
                 if (indiceFocado - COLUNAS >= 0)
                     novoIndice = indiceFocado - COLUNAS;
                 break;
-
             case KeyEvent.KEYCODE_DPAD_CENTER:
             case KeyEvent.KEYCODE_ENTER:
                 processarClique(indiceFocado);
                 return true;
-
             case KeyEvent.KEYCODE_BACK:
                 finish();
                 return true;
-
             default:
                 return super.onKeyDown(keyCode, event);
         }
@@ -194,30 +175,43 @@ public class MemoriaActivity extends Activity {
     }
 
     /**
-     * Lógica de virar cartas e verificar par.
+     * Vira a carta com animação de flip 3D + som.
      */
     private void processarClique(int indice) {
         if (bloqueado) return;
-        if (!botoes[indice].isEnabled()) return; // carta já encontrada
-        if (!"?".equals(botoes[indice].getText().toString())) return; // já virada neste turno
+        if (!botoes[indice].isEnabled()) return;
+        if (!"?".equals(botoes[indice].getText().toString())) return;
 
-        // Vira a carta
-        int valorCarta = listaValores.get(indice);
-        String emoji = EMOJIS[valorCarta];
-        botoes[indice].setText(emoji);
+        final int valorCarta = listaValores.get(indice);
+        final String emoji   = EMOJIS[valorCarta];
+        final Button carta   = botoes[indice];
+
+        // Som + animação de flip
+        sound.playCartaVirou();
+        AnimHelper.flipCarta(carta, new AnimHelper.OnHalfFlip() {
+            @Override
+            public void onHalf() {
+                carta.setText(emoji);
+                carta.setTextSize(26);
+            }
+        });
 
         if (indicePrimeira == -1) {
             indicePrimeira = indice;
         } else {
             indiceSegunda = indice;
             bloqueado = true;
-            verificarPar();
+
+            // Pequeno delay para deixar o flip terminar antes de verificar
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    verificarPar();
+                }
+            }, 380);
         }
     }
 
-    /**
-     * Verifica se as duas cartas viradas formam um par.
-     */
     private void verificarPar() {
         int val1 = listaValores.get(indicePrimeira);
         int val2 = listaValores.get(indiceSegunda);
@@ -228,22 +222,49 @@ public class MemoriaActivity extends Activity {
         resetarSelecao();
 
         if (val1 == val2) {
-            // Par encontrado!
-            botoes[idx1].setEnabled(false);
-            botoes[idx2].setEnabled(false);
-            paresEncontrados++;
-            atualizarPlacar();
+            // PAR CORRETO — pulso dourado nas duas cartas
+            sound.playAcerto();
+            AnimHelper.pulseGold(botoes[idx1]);
+            AnimHelper.pulseGold(botoes[idx2]);
 
-            if (paresEncontrados == TOTAL_PARES) {
-                mostrarVitoria();
-            }
-        } else {
-            // Par errado — fecha após delay
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    botoes[idx1].setText("?");
-                    botoes[idx2].setText("?");
+                    botoes[idx1].setEnabled(false);
+                    botoes[idx2].setEnabled(false);
+                    paresEncontrados++;
+                    atualizarPlacar();
+
+                    if (paresEncontrados == TOTAL_PARES) {
+                        mostrarVitoria();
+                    }
+                }
+            }, 200);
+
+        } else {
+            // PAR ERRADO — shake nas cartas + som de erro
+            sound.playErro();
+            AnimHelper.shake(botoes[idx1]);
+            AnimHelper.shake(botoes[idx2]);
+
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    // Flip de volta para "?"
+                    AnimHelper.flipCarta(botoes[idx1], new AnimHelper.OnHalfFlip() {
+                        @Override
+                        public void onHalf() {
+                            botoes[idx1].setText("?");
+                            botoes[idx1].setTextSize(22);
+                        }
+                    });
+                    AnimHelper.flipCarta(botoes[idx2], new AnimHelper.OnHalfFlip() {
+                        @Override
+                        public void onHalf() {
+                            botoes[idx2].setText("?");
+                            botoes[idx2].setTextSize(22);
+                        }
+                    });
                     bloqueado = false;
                 }
             }, DELAY_FECHAR);
@@ -260,17 +281,23 @@ public class MemoriaActivity extends Activity {
         tvPlacar.setText("Pares: " + paresEncontrados + " / " + TOTAL_PARES);
     }
 
-    /**
-     * Quando o jogador encontra todos os pares, salva o progresso e mostra o diálogo de vitória.
-     */
     private void mostrarVitoria() {
-        // Salva progresso (só uma vez por dia)
         if (!perfil.isMemoriaConcluida()) {
+            int xpAntes = perfil.getXPPorcentagem();
             perfil.addXP(XP_GANHO);
             perfil.addStatInteligencia(STAT_INT_GANHO);
             perfil.addStatFoco(STAT_FOC_GANHO);
             perfil.setMemoriaConcluida();
+
+            // Som de vitória + XP ganho
+            sound.playVitoria();
+            if (perfil.getNivel() > 1) sound.playNivelUp();
+        } else {
+            sound.playVitoria();
         }
+
+        // Celebração visual no placar
+        AnimHelper.celebracao(tvPlacar);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Parabens, Helena!");
@@ -297,12 +324,14 @@ public class MemoriaActivity extends Activity {
             }
         });
 
-        builder.show();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!isFinishing()) builder.show();
+            }
+        }, 600);
     }
 
-    /**
-     * Reinicia o jogo com novo embaralhamento.
-     */
     private void reiniciarJogo() {
         paresEncontrados = 0;
         indicePrimeira   = -1;
@@ -314,6 +343,7 @@ public class MemoriaActivity extends Activity {
 
         for (int i = 0; i < TOTAL_CARTAS; i++) {
             botoes[i].setText("?");
+            botoes[i].setTextSize(22);
             botoes[i].setEnabled(true);
         }
 
