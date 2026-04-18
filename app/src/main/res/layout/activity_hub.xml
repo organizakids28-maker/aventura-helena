@@ -31,15 +31,18 @@
             android:gravity="center"
             android:layout_marginBottom="10dp" />
 
-        <!-- Avatar grande (emoji) -->
-        <TextView
-            android:id="@+id/tv_avatar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="\uD83D\uDC67"
-            android:textSize="72sp"
-            android:gravity="center"
-            android:layout_marginBottom="4dp" />
+        <!-- Avatar da Helena (foto real) -->
+        <ImageView
+            android:id="@+id/iv_avatar"
+            android:layout_width="110dp"
+            android:layout_height="110dp"
+            android:src="@drawable/helena_avatar"
+            android:scaleType="centerCrop"
+            android:background="@drawable/circle_border"
+            android:clipToOutline="true"
+            android:outlineProvider="background"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="8dp" />
 
         <!-- Nome da Helena -->
         <TextView
