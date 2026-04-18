@@ -28,6 +28,7 @@ public class HubActivity extends Activity {
     private static final int TOTAL_TAREFAS = 10;
 
     private PerfilHelena perfil;
+    private int xpPctAnterior = 0; // para animar o progresso da barra
 
     // Views do perfil
     private TextView tvNivel;
@@ -132,6 +133,11 @@ public class HubActivity extends Activity {
             }
         });
 
+        // Animação de entrada dos cards (escalonada)
+        AnimHelper.zoomEntrada(cardMemoria,  0);
+        AnimHelper.zoomEntrada(cardPalavras, 80);
+        AnimHelper.zoomEntrada(cardTarefas,  160);
+
         // Foco inicial no card da Memória
         cardMemoria.requestFocus();
     }
@@ -158,7 +164,10 @@ public class HubActivity extends Activity {
         // Perfil
         tvNivel.setText("Nivel " + nivel + " \u2022 " + titulo);
         tvXP.setText(xp + " XP \u2192 Nivel " + (nivel + 1));
-        pbXP.setProgress(xpPct);
+
+        // Anima a barra de XP do valor anterior para o novo
+        AnimHelper.animarXP(pbXP, xpPctAnterior, xpPct);
+        xpPctAnterior = xpPct;
 
         // Stats
         tvInt.setText(String.valueOf(perfil.getStatInteligencia()));
