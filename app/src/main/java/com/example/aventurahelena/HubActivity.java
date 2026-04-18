@@ -2,9 +2,11 @@ package com.example.aventurahelena;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -52,6 +54,12 @@ public class HubActivity extends Activity {
         setContentView(R.layout.activity_hub);
 
         perfil = new PerfilHelena(this);
+
+        // Corte circular no avatar (API 21+)
+        ImageView ivAvatar = (ImageView) findViewById(R.id.iv_avatar);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            ivAvatar.setClipToOutline(true);
+        }
 
         // Referências às views do perfil
         tvNivel   = (TextView)    findViewById(R.id.tv_nivel);
