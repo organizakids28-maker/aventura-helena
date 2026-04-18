@@ -4,139 +4,168 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#1A0033"
-    android:padding="16dp">
+    android:background="#0D0018"
+    android:padding="14dp">
 
-    <!-- Cabeçalho da batalha com HP -->
+    <!-- ═══════════════════════════════════════
+         BARRAS DE HP
+    ═══════════════════════════════════════ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_marginBottom="12dp">
+        android:layout_marginBottom="6dp">
 
-        <!-- HP da Helena -->
+        <!-- Helena HP -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:gravity="center">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="HELENA"
-                android:textColor="#FFD700"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+            android:layout_marginRight="10dp">
+
             <TextView
                 android:id="@+id/tv_hp_helena"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="HP: 3/3"
+                android:text="HELENA  100/100"
                 android:textColor="#4CAF50"
-                android:textSize="22sp"
-                android:textStyle="bold" />
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="3dp" />
+
+            <ProgressBar
+                android:id="@+id/pb_hp_helena"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="12dp"
+                android:max="100"
+                android:progress="100"
+                android:progressTint="#4CAF50"
+                android:progressBackgroundTint="#1B3A1B" />
         </LinearLayout>
 
-        <!-- Fase atual -->
+        <!-- VS -->
         <TextView
-            android:id="@+id/tv_fase"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="FASE 1\nMemoria"
-            android:textColor="#CE93D8"
+            android:text="&#x2694; VS &#x2694;"
+            android:textColor="#FFD700"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:gravity="center" />
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp" />
 
-        <!-- HP do Inimigo -->
+        <!-- Bruxo HP -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:gravity="center">
+            android:layout_marginLeft="10dp">
+
             <TextView
-                android:layout_width="wrap_content"
+                android:id="@+id/tv_hp_bruxo"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="BRUXO"
-                android:textColor="#EF5350"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-            <TextView
-                android:id="@+id/tv_hp_inimigo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="HP: 3/3"
-                android:textColor="#EF5350"
-                android:textSize="22sp"
-                android:textStyle="bold" />
+                android:text="BRUXO  150/150"
+                android:textColor="#CE93D8"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:gravity="end"
+                android:layout_marginBottom="3dp" />
+
+            <ProgressBar
+                android:id="@+id/pb_hp_bruxo"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="12dp"
+                android:max="150"
+                android:progress="150"
+                android:progressTint="#9C27B0"
+                android:progressBackgroundTint="#2D0040" />
         </LinearLayout>
 
     </LinearLayout>
 
-    <!-- Area principal do jogo (muda conforme a fase) -->
+    <!-- Modo atual -->
+    <TextView
+        android:id="@+id/tv_modo_batalha"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ataque: Complete a Palavra"
+        android:textColor="#CE93D8"
+        android:textSize="12sp"
+        android:gravity="center"
+        android:layout_marginBottom="2dp" />
+
+    <!-- Feedback -->
+    <TextView
+        android:id="@+id/tv_feedback_batalha"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:minHeight="26dp"
+        android:layout_marginBottom="6dp" />
+
+    <!-- ═══════════════════════════════════════
+         ÁREA DE JOGO
+    ═══════════════════════════════════════ -->
     <FrameLayout
-        android:id="@+id/fl_jogo"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <!-- FASE 1: Grid de memória 2x3 -->
-        <GridLayout
-            android:id="@+id/grid_batalha"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:columnCount="3"
-            android:rowCount="2"
-            android:visibility="visible" />
-
-        <!-- FASE 2: Pergunta de palavras -->
+        <!-- ── MODO PALAVRA ── -->
         <LinearLayout
-            android:id="@+id/ll_palavras_batalha"
+            android:id="@+id/ll_modo_palavra"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:gravity="center"
-            android:visibility="gone">
+            android:gravity="center_vertical"
+            android:visibility="visible">
 
+            <!-- Dica da palavra -->
             <TextView
-                android:id="@+id/tv_pergunta_batalha"
+                android:id="@+id/tv_dica_palavra"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Pergunta 1 de 3"
-                android:textColor="#CE93D8"
-                android:textSize="16sp"
+                android:text=""
+                android:textColor="#AB47BC"
+                android:textSize="14sp"
+                android:textStyle="italic"
                 android:gravity="center"
-                android:layout_marginBottom="8dp" />
+                android:layout_marginBottom="12dp" />
 
-            <TextView
-                android:id="@+id/tv_palavra_batalha"
+            <!-- Letras da palavra (preenchidas dinamicamente) -->
+            <LinearLayout
+                android:id="@+id/ll_letras"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="G _ T O"
-                android:textColor="#FFD700"
-                android:textSize="44sp"
-                android:textStyle="bold"
+                android:orientation="horizontal"
                 android:gravity="center"
-                android:layout_marginBottom="24dp" />
+                android:layout_marginBottom="20dp" />
 
+            <!-- 4 Botões de opção de letra -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center">
+                android:gravity="center"
+                android:layout_marginBottom="14dp">
 
                 <Button
-                    android:id="@+id/btn_bat0"
+                    android:id="@+id/btn_op0"
                     android:layout_width="0dp"
                     android:layout_height="70dp"
                     android:layout_weight="1"
                     android:text=""
                     android:textColor="#FFFFFF"
-                    android:textSize="18sp"
+                    android:textSize="28sp"
                     android:textStyle="bold"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
@@ -144,13 +173,13 @@
                     android:layout_marginRight="8dp" />
 
                 <Button
-                    android:id="@+id/btn_bat1"
+                    android:id="@+id/btn_op1"
                     android:layout_width="0dp"
                     android:layout_height="70dp"
                     android:layout_weight="1"
                     android:text=""
                     android:textColor="#FFFFFF"
-                    android:textSize="18sp"
+                    android:textSize="28sp"
                     android:textStyle="bold"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
@@ -158,13 +187,13 @@
                     android:layout_marginRight="8dp" />
 
                 <Button
-                    android:id="@+id/btn_bat2"
+                    android:id="@+id/btn_op2"
                     android:layout_width="0dp"
                     android:layout_height="70dp"
                     android:layout_weight="1"
                     android:text=""
                     android:textColor="#FFFFFF"
-                    android:textSize="18sp"
+                    android:textSize="28sp"
                     android:textStyle="bold"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
@@ -172,13 +201,13 @@
                     android:layout_marginRight="8dp" />
 
                 <Button
-                    android:id="@+id/btn_bat3"
+                    android:id="@+id/btn_op3"
                     android:layout_width="0dp"
                     android:layout_height="70dp"
                     android:layout_weight="1"
                     android:text=""
                     android:textColor="#FFFFFF"
-                    android:textSize="18sp"
+                    android:textSize="28sp"
                     android:textStyle="bold"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
@@ -186,19 +215,30 @@
 
             </LinearLayout>
 
+            <!-- Botão Magia da Memória -->
+            <Button
+                android:id="@+id/btn_magia"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="&#x2728; Magia da Memoria (acerte 2 palavras)"
+                android:textColor="#7A5A80"
+                android:textSize="14sp"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:enabled="false"
+                android:background="@drawable/btn_magia" />
+
         </LinearLayout>
 
-    </FrameLayout>
+        <!-- ── MODO MEMÓRIA (magia especial) 6 colunas × 2 linhas ── -->
+        <GridLayout
+            android:id="@+id/gl_memoria_batalha"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:columnCount="6"
+            android:rowCount="2"
+            android:visibility="gone" />
 
-    <!-- Mensagem de resultado -->
-    <TextView
-        android:id="@+id/tv_resultado_batalha"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:layout_marginTop="8dp" />
+    </FrameLayout>
 
 </LinearLayout>
