@@ -5,137 +5,179 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.GridLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
+/**
+ * BatalhaActivity — Batalha Final com dois modos de combate:
+ *
+ *   Modo Palavra  (ataque normal): Complete a lacuna da palavra.
+ *     Acerto → Bruxo perde 12-26 HP.  Erro → Helena perde 8-19 HP.
+ *     2 palavras consecutivas certas → Magia disponível.
+ *
+ *   Modo Memória  (magia especial): Jogo da Memória com 6 pares e imagens reais.
+ *     Todos os pares → Bruxo perde 40-60 HP. Par errado → Helena perde 6-13 HP.
+ *
+ *   Helena: 100 HP  |  Bruxo das Trevas: 150 HP
+ */
 public class BatalhaActivity extends Activity {
 
-    private static final int HP_MAX = 3;
+    /* ─── HP ───────────────────────────────────────────────── */
+    private static final int HP_HELENA_MAX = 100;
+    private static final int HP_BRUXO_MAX  = 150;
 
-    private static final String[] EMOJIS_BATALHA = {
-        "\u2B50", "\uD83C\uDF08", "\uD83D\uDC31"
+    /* ─── Banco de palavras ─────────────────────────────────── */
+    private static final String[][] BANCO = {
+        { "GATO",       "Mia e gosta de dormir",               "Animal" },
+        { "CACHORRO",   "Melhor amigo do homem",               "Animal" },
+        { "BANANA",     "Amarela e dos macacos",               "Fruta"  },
+        { "BRASIL",     "Pais do futebol e do carnaval",       "Pais"   },
+        { "ESCOLA",     "Lugar onde se aprende",               "Lugar"  },
+        { "FUTEBOL",    "Esporte mais popular do Brasil",      "Esporte"},
+        { "AMARELO",    "Cor do sol e da banana",              "Cor"    },
+        { "MEDICO",     "Cuida da saude das pessoas",          "Prof."  },
+        { "ELEFANTE",   "Maior animal terrestre",              "Animal" },
+        { "TARTARUGA",  "Animal lento com casco",              "Animal" },
+        { "MELANCIA",   "Vermelha por dentro, verde por fora", "Fruta"  },
+        { "COMPUTADOR", "Maquina para trabalhar e jogar",      "Tecno." },
     };
 
-    private static final String[][] BANCO_PALAVRAS = {
-        {"G_TO",   "Animal que mia",     "GATO",  "PATO",  "RATO",  "BOLO",  "0"},
-        {"C_SA",   "Onde moramos",       "BASA",  "CASA",  "MADA",  "FASA",  "1"},
-        {"B_LA",   "Brinquedo redondo",  "ROLA",  "COLA",  "BOLA",  "MOLA",  "2"},
-        {"S_L",    "Brilha no ceu",      "SAL",   "SIL",   "SOR",   "SOL",   "3"},
-        {"AM_GO",  "Pessoa amiga",       "AMIGO", "AMIDA", "AMINA", "AMILO", "0"},
-        {"P_O",    "Alimento de farinha","PAU",   "PAI",   "PAO",   "PAZ",   "2"},
-        {"LE_TE",  "Bebida branca",      "LESTE", "LEITE", "LENTO", "LEVE",  "1"},
-        {"_EIXE",  "Vive na agua",       "FEICE", "DEIXE", "PEIXE", "MEICE", "2"},
-        {"BO_O",   "Sobremesa",          "BOSO",  "BOLO",  "BORO",  "BOCO",  "1"},
-        {"FL_R",   "Planta bonita",      "FLOU",  "FLOX",  "FLON",  "FLOR",  "3"},
+    /* ─── Drawables das cartas ──────────────────────────────── */
+    private static final int[] CARTAS_FRENTE = {
+        R.drawable.card_gato, R.drawable.card_cachorro, R.drawable.card_estrela,
+        R.drawable.card_coracao, R.drawable.card_sol, R.drawable.card_lua
     };
+    private static final int CARTA_VERSO = R.drawable.card_verso;
 
-    private int hpHelena   = HP_MAX;
-    private int hpInimigo  = HP_MAX;
-    private int fase = 1;
+    /* ─── Modo de batalha ───────────────────────────────────── */
+    private static final int MODO_PALAVRA  = 0;
+    private static final int MODO_MEMORIA  = 1;
 
-    private TextView tvHpHelena;
-    private TextView tvHpInimigo;
-    private TextView tvFase;
-    private TextView tvResultado;
-    private GridLayout gridBatalha;
-    private LinearLayout llPalavrasBatalha;
-    private TextView tvPerguntaBatalha;
-    private TextView tvPalavraBatalha;
-    private Button[] btnBat;
+    /* ─── Estado geral ──────────────────────────────────────── */
+    private int hpHelena = HP_HELENA_MAX;
+    private int hpBruxo  = HP_BRUXO_MAX;
+    private int modoBatalha = MODO_PALAVRA;
+    private int acertosConsec = 0;
+    private boolean magiaDisp = false;
+    private boolean bloqueado = false;
+    private boolean batalhaTerminou = false;
 
-    private static final int TOTAL_CARTAS_BAT  = 6;
-    private static final int COLUNAS_BAT       = 3;
-    private static final int TOTAL_PARES_BAT   = 3;
-    private static final int DELAY_FECHAR      = 950;
+    /* ─── Views HP ──────────────────────────────────────────── */
+    private TextView    tvHpHelena, tvHpBruxo;
+    private ProgressBar pbHpHelena, pbHpBruxo;
+    private TextView    tvFeedback, tvModo;
 
-    private List<Integer> listaValoresBat;
-    private Button[] botoesBat;
-    private int primeiraBat = -1;
-    private int segundaBat  = -1;
-    private int paresEncontradosBat = 0;
-    private int errosBat = 0;
-    private boolean bloqueadoBat = false;
-    private int indiceFocadoBat = 0;
+    /* ─── Modo Palavra ──────────────────────────────────────── */
+    private LinearLayout llModoPalavra;
+    private LinearLayout llLetras;
+    private TextView     tvDica;
+    private Button[]     botoesOpcao;
+    private Button       btnMagia;
+    private int          opcaoFocada = 0;
+    private boolean      magiaBotaoFocado = false;
+    private boolean      aguardandoProxima = false;
 
-    private List<Integer> indicesPalavras;
-    private int perguntaAtualBat = 0;
-    private boolean aguardandoProximaBat = false;
-    private int opcaoFocadaBat = 0;
+    private String   palavraAtual, dicaAtual, catAtual;
+    private int[]    blanksAtual;
+    private char[]   reveladasAtual;
+    private int      blankAtualIdx;
+    private char[]   opcoesAtual = new char[4];
+    private List<Integer> palavrasUsadas = new ArrayList<Integer>();
 
-    private Handler handler;
+    /* ─── Modo Memória ──────────────────────────────────────── */
+    private static final int TOTAL_PARES = 6;
+    private static final int COLS_MEM    = 6;
+    private static final int TOTAL_CARTAS = TOTAL_PARES * 2;
+
+    private GridLayout   glMemoria;
+    private List<Integer> valoresCartas;
+    private boolean[]    cartasViradas;
+    private boolean[]    cartasEncontradas;
+    private FrameLayout[] frameCartas;
+    private ImageView[]  imgCartas;
+    private int primeiraCarta = -1, segundaCarta = -1;
+    private int paresEncontrados = 0;
+    private boolean bloqMem = false;
+    private int focadoMem = 0;
+
+    /* ─── Utilitários ───────────────────────────────────────── */
+    private Handler      handler = new Handler();
     private PerfilHelena perfil;
     private SoundManager sound;
+    private Random       rng = new Random();
+
+    // ═══════════════════════════════════════════════════════════
+    // CICLO DE VIDA
+    // ═══════════════════════════════════════════════════════════
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_batalha);
 
-        perfil  = new PerfilHelena(this);
-        handler = new Handler();
-        sound   = new SoundManager();
+        perfil = new PerfilHelena(this);
+        sound  = new SoundManager();
 
-        tvHpHelena  = (TextView) findViewById(R.id.tv_hp_helena);
-        tvHpInimigo = (TextView) findViewById(R.id.tv_hp_inimigo);
-        tvFase      = (TextView) findViewById(R.id.tv_fase);
-        tvResultado = (TextView) findViewById(R.id.tv_resultado_batalha);
+        tvHpHelena   = (TextView)    findViewById(R.id.tv_hp_helena);
+        tvHpBruxo    = (TextView)    findViewById(R.id.tv_hp_bruxo);
+        pbHpHelena   = (ProgressBar) findViewById(R.id.pb_hp_helena);
+        pbHpBruxo    = (ProgressBar) findViewById(R.id.pb_hp_bruxo);
+        tvFeedback   = (TextView)    findViewById(R.id.tv_feedback_batalha);
+        tvModo       = (TextView)    findViewById(R.id.tv_modo_batalha);
+        llModoPalavra = (LinearLayout) findViewById(R.id.ll_modo_palavra);
+        llLetras     = (LinearLayout) findViewById(R.id.ll_letras);
+        tvDica       = (TextView)   findViewById(R.id.tv_dica_palavra);
+        glMemoria    = (GridLayout)  findViewById(R.id.gl_memoria_batalha);
 
-        gridBatalha       = (GridLayout)    findViewById(R.id.grid_batalha);
-        llPalavrasBatalha = (LinearLayout)  findViewById(R.id.ll_palavras_batalha);
-        tvPerguntaBatalha = (TextView)      findViewById(R.id.tv_pergunta_batalha);
-        tvPalavraBatalha  = (TextView)      findViewById(R.id.tv_palavra_batalha);
-
-        btnBat = new Button[]{
-            (Button) findViewById(R.id.btn_bat0),
-            (Button) findViewById(R.id.btn_bat1),
-            (Button) findViewById(R.id.btn_bat2),
-            (Button) findViewById(R.id.btn_bat3)
+        botoesOpcao = new Button[]{
+            (Button) findViewById(R.id.btn_op0),
+            (Button) findViewById(R.id.btn_op1),
+            (Button) findViewById(R.id.btn_op2),
+            (Button) findViewById(R.id.btn_op3)
         };
+        btnMagia = (Button) findViewById(R.id.btn_magia);
 
         for (int i = 0; i < 4; i++) {
             final int idx = i;
-            btnBat[i].setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    verificarRespostaPalavra(idx);
-                }
+            botoesOpcao[i].setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) { responderLetra(idx); }
             });
-            btnBat[i].setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                @Override
-                public void onFocusChange(View v, boolean hasFocus) {
-                    if (hasFocus) opcaoFocadaBat = idx;
+            botoesOpcao[i].setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override public void onFocusChange(View v, boolean hasFocus) {
+                    if (hasFocus) { opcaoFocada = idx; magiaBotaoFocado = false; }
                 }
             });
         }
+        btnMagia.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { ativarMagia(); }
+        });
+        btnMagia.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) { magiaBotaoFocado = true; }
+            }
+        });
 
-        indicesPalavras = new ArrayList<Integer>();
-        for (int i = 0; i < BANCO_PALAVRAS.length; i++) indicesPalavras.add(i);
-        Collections.shuffle(indicesPalavras);
-        while (indicesPalavras.size() > 3) {
-            indicesPalavras.remove(indicesPalavras.size() - 1);
-        }
-
+        pbHpHelena.setMax(HP_HELENA_MAX);
+        pbHpBruxo.setMax(HP_BRUXO_MAX);
         atualizarHP();
-
-        // Animação e som de início de batalha
-        AnimHelper.celebracao(tvFase);
         sound.playBatalhaInicio();
 
         handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                iniciarFase1();
-            }
-        }, 600);
+            @Override public void run() { iniciarModoPalavra(); }
+        }, 500);
     }
 
     @Override
@@ -144,312 +186,441 @@ public class BatalhaActivity extends Activity {
         sound.release();
     }
 
-    // ════════════════════════════════════════════
-    // FASE 1 — MEMÓRIA
-    // ════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════
+    // MODO PALAVRA
+    // ═══════════════════════════════════════════════════════════
 
-    private void iniciarFase1() {
-        fase = 1;
-        tvFase.setText("FASE 1\nMemoria");
-        tvResultado.setText("");
-
-        gridBatalha.setVisibility(View.VISIBLE);
-        llPalavrasBatalha.setVisibility(View.GONE);
-
-        listaValoresBat = new ArrayList<Integer>();
-        for (int i = 0; i < TOTAL_PARES_BAT; i++) {
-            listaValoresBat.add(i);
-            listaValoresBat.add(i);
-        }
-        Collections.shuffle(listaValoresBat);
-
-        gridBatalha.removeAllViews();
-        botoesBat = new Button[TOTAL_CARTAS_BAT];
-
-        for (int i = 0; i < TOTAL_CARTAS_BAT; i++) {
-            Button btn = new Button(this);
-            btn.setText("?");
-            btn.setTextSize(26);
-            btn.setTextColor(0xFFFFFFFF);
-            btn.setBackgroundResource(R.drawable.btn_selector);
-            btn.setFocusable(true);
-            btn.setFocusableInTouchMode(true);
-
-            final int indice = i;
-            btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    indiceFocadoBat = indice;
-                    processarCliqueMemoria(indice);
-                }
-            });
-            btn.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                @Override
-                public void onFocusChange(View v, boolean hasFocus) {
-                    if (hasFocus) indiceFocadoBat = indice;
-                }
-            });
-
-            GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-            params.width  = 0;
-            params.height = 0;
-            params.columnSpec = GridLayout.spec(i % COLUNAS_BAT, 1f);
-            params.rowSpec    = GridLayout.spec(i / COLUNAS_BAT, 1f);
-            params.setMargins(10, 10, 10, 10);
-            btn.setLayoutParams(params);
-
-            // Cartas entram escalonadas
-            AnimHelper.zoomEntrada(btn, i * 80);
-
-            gridBatalha.addView(btn);
-            botoesBat[i] = btn;
-        }
-
-        indiceFocadoBat = 0;
-        botoesBat[0].requestFocus();
+    private void iniciarModoPalavra() {
+        modoBatalha = MODO_PALAVRA;
+        glMemoria.setVisibility(View.GONE);
+        AnimHelper.fadeIn(llModoPalavra, 200);
+        tvModo.setText("Ataque: Complete a Palavra");
+        carregarPalavra();
     }
 
-    private void processarCliqueMemoria(int indice) {
-        if (bloqueadoBat) return;
-        if (!botoesBat[indice].isEnabled()) return;
-        if (!"?".equals(botoesBat[indice].getText().toString())) return;
+    private void carregarPalavra() {
+        aguardandoProxima = false;
+        bloqueado = false;
+        magiaBotaoFocado = false;
 
-        final int valor  = listaValoresBat.get(indice);
-        final Button btn = botoesBat[indice];
+        if (palavrasUsadas.size() >= BANCO.length) palavrasUsadas.clear();
 
-        // Som + flip
+        List<Integer> disponiveis = new ArrayList<Integer>();
+        for (int i = 0; i < BANCO.length; i++) {
+            if (!palavrasUsadas.contains(i)) disponiveis.add(i);
+        }
+        int escolhido = disponiveis.get(rng.nextInt(disponiveis.size()));
+        palavrasUsadas.add(escolhido);
+
+        palavraAtual = BANCO[escolhido][0];
+        dicaAtual    = BANCO[escolhido][1];
+        catAtual     = BANCO[escolhido][2];
+
+        int n = palavraAtual.length() <= 4 ? 1 : palavraAtual.length() <= 6 ? 2 : 3;
+        List<Integer> indices = new ArrayList<Integer>();
+        for (int i = 0; i < palavraAtual.length(); i++) indices.add(i);
+        Collections.shuffle(indices);
+        blanksAtual = new int[n];
+        for (int i = 0; i < n; i++) blanksAtual[i] = indices.get(i);
+        java.util.Arrays.sort(blanksAtual);
+
+        reveladasAtual = palavraAtual.toCharArray();
+        for (int b : blanksAtual) reveladasAtual[b] = '_';
+        blankAtualIdx = 0;
+
+        tvDica.setText("[" + catAtual + "]  " + dicaAtual);
+        desenharLetras();
+        gerarOpcoes();
+        atualizarBotaoMagia();
+
+        opcaoFocada = 0;
+        botoesOpcao[0].requestFocus();
+        AnimHelper.fadeIn(llLetras, 200);
+    }
+
+    private void desenharLetras() {
+        llLetras.removeAllViews();
+        int boxDp = Math.max(36, Math.min(56, 320 / Math.max(1, palavraAtual.length())));
+        int boxPx = dp(boxDp);
+
+        for (int i = 0; i < palavraAtual.length(); i++) {
+            boolean isBlank  = contem(blanksAtual, i);
+            boolean isAtual  = isBlank && blankAtualIdx < blanksAtual.length
+                               && blanksAtual[blankAtualIdx] == i;
+
+            FrameLayout box = new FrameLayout(this);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(boxPx, boxPx);
+            lp.setMargins(dp(3), dp(4), dp(3), dp(4));
+            box.setLayoutParams(lp);
+
+            if (isAtual) {
+                box.setBackgroundResource(R.drawable.letra_atual_bg);
+            } else if (isBlank) {
+                box.setBackgroundResource(R.drawable.letra_blank_bg);
+            } else {
+                box.setBackgroundResource(R.drawable.letra_dada_bg);
+            }
+
+            TextView tv = new TextView(this);
+            FrameLayout.LayoutParams tvLp = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            );
+            tv.setLayoutParams(tvLp);
+            tv.setGravity(Gravity.CENTER);
+            tv.setTextSize(20);
+            tv.setTextColor(0xFFFFFFFF);
+            tv.setTypeface(null, android.graphics.Typeface.BOLD);
+            tv.setText(isBlank && reveladasAtual[i] == '_' ? "" : String.valueOf(reveladasAtual[i]));
+            box.addView(tv);
+            llLetras.addView(box);
+        }
+    }
+
+    private void gerarOpcoes() {
+        if (blankAtualIdx >= blanksAtual.length) return;
+        char correta = palavraAtual.charAt(blanksAtual[blankAtualIdx]);
+
+        List<Character> pool = new ArrayList<Character>();
+        for (char c = 'A'; c <= 'Z'; c++) {
+            if (c != correta && palavraAtual.indexOf(c) == -1) pool.add(c);
+        }
+        Collections.shuffle(pool);
+
+        List<Character> lista = new ArrayList<Character>();
+        lista.add(correta);
+        lista.add(pool.get(0));
+        lista.add(pool.get(1));
+        lista.add(pool.get(2));
+        Collections.shuffle(lista);
+
+        for (int i = 0; i < 4; i++) {
+            opcoesAtual[i] = lista.get(i);
+            botoesOpcao[i].setText(String.valueOf(opcoesAtual[i]));
+            botoesOpcao[i].setEnabled(true);
+            botoesOpcao[i].setTextColor(0xFFFFFFFF);
+            AnimHelper.zoomEntrada(botoesOpcao[i], i * 60);
+        }
+    }
+
+    private void responderLetra(final int opcaoIdx) {
+        if (bloqueado || aguardandoProxima || batalhaTerminou) return;
+        if (modoBatalha != MODO_PALAVRA) return;
+
+        char escolhida = opcoesAtual[opcaoIdx];
+        char correta   = palavraAtual.charAt(blanksAtual[blankAtualIdx]);
+
+        bloqueado = true;
+        for (Button b : botoesOpcao) b.setEnabled(false);
+
+        if (escolhida == correta) {
+            sound.playAcerto();
+            reveladasAtual[blanksAtual[blankAtualIdx]] = correta;
+            botoesOpcao[opcaoIdx].setTextColor(0xFF4CAF50);
+            AnimHelper.pulseGold(botoesOpcao[opcaoIdx]);
+            blankAtualIdx++;
+            desenharLetras();
+
+            if (blankAtualIdx >= blanksAtual.length) {
+                final int dano = 12 + rng.nextInt(15);
+                hpBruxo = Math.max(0, hpBruxo - dano);
+                atualizarHP();
+                AnimHelper.flashRed(tvHpBruxo);
+                AnimHelper.pulseGold(tvHpBruxo);
+                sound.playDano(false);
+
+                acertosConsec++;
+                if (acertosConsec >= 2) magiaDisp = true;
+                atualizarBotaoMagia();
+
+                mostrarFeedback("\u2694 \"" + palavraAtual + "\" \u2014 Bruxo perdeu " + dano + " HP!", 0xFFFFD700);
+
+                if (hpBruxo <= 0) {
+                    handler.postDelayed(new Runnable() {
+                        @Override public void run() { finalizarBatalha(true); }
+                    }, 800);
+                    return;
+                }
+
+                aguardandoProxima = true;
+                handler.postDelayed(new Runnable() {
+                    @Override public void run() { carregarPalavra(); }
+                }, 1300);
+
+            } else {
+                mostrarFeedback("\u2705 Certo! Continue...", 0xFF69F0AE);
+                gerarOpcoes();
+                handler.postDelayed(new Runnable() {
+                    @Override public void run() {
+                        bloqueado = false;
+                        for (Button b : botoesOpcao) b.setEnabled(true);
+                        opcaoFocada = 0;
+                        botoesOpcao[0].requestFocus();
+                    }
+                }, 350);
+            }
+
+        } else {
+            sound.playErro();
+            sound.playDano(true);
+            final int dano = 8 + rng.nextInt(12);
+            hpHelena = Math.max(0, hpHelena - dano);
+            atualizarHP();
+            AnimHelper.flashRed(tvHpHelena);
+            AnimHelper.shake(tvFeedback);
+
+            acertosConsec = 0;
+            atualizarBotaoMagia();
+
+            mostrarFeedback("\u274C Errado! Bruxo atacou: -" + dano + " HP de Helena", 0xFFFF5252);
+
+            if (hpHelena <= 0) {
+                handler.postDelayed(new Runnable() {
+                    @Override public void run() { finalizarBatalha(false); }
+                }, 800);
+                return;
+            }
+
+            handler.postDelayed(new Runnable() {
+                @Override public void run() {
+                    gerarOpcoes();
+                    bloqueado = false;
+                    for (Button b : botoesOpcao) b.setEnabled(true);
+                    opcaoFocada = 0;
+                    botoesOpcao[0].requestFocus();
+                }
+            }, 950);
+        }
+    }
+
+    private void atualizarBotaoMagia() {
+        if (magiaDisp) {
+            btnMagia.setText("\u2728 Magia da Memoria (disponivel!)");
+            btnMagia.setEnabled(true);
+            btnMagia.setTextColor(0xFFFFD700);
+        } else {
+            int faltam = Math.max(0, 2 - acertosConsec);
+            btnMagia.setText("\u2728 Magia da Memoria (acerte " + faltam
+                + (faltam == 1 ? " palavra)" : " palavras)"));
+            btnMagia.setEnabled(false);
+            btnMagia.setTextColor(0xFF7A5A80);
+        }
+    }
+
+    private void ativarMagia() {
+        if (!magiaDisp || batalhaTerminou || modoBatalha != MODO_PALAVRA) return;
+        magiaDisp = false;
+        acertosConsec = 0;
+        sound.playBatalhaInicio();
+        tvModo.setText("\u2728 Magia da Memoria!");
+        llModoPalavra.setVisibility(View.GONE);
+        iniciarModoMemoria();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // MODO MEMÓRIA (magia especial)
+    // ═══════════════════════════════════════════════════════════
+
+    private void iniciarModoMemoria() {
+        modoBatalha = MODO_MEMORIA;
+        paresEncontrados = 0;
+        primeiraCarta = -1;
+        segundaCarta  = -1;
+        bloqMem = false;
+        focadoMem = 0;
+
+        valoresCartas = new ArrayList<Integer>();
+        for (int i = 0; i < TOTAL_PARES; i++) {
+            valoresCartas.add(i);
+            valoresCartas.add(i);
+        }
+        Collections.shuffle(valoresCartas);
+
+        cartasViradas    = new boolean[TOTAL_CARTAS];
+        cartasEncontradas = new boolean[TOTAL_CARTAS];
+        frameCartas      = new FrameLayout[TOTAL_CARTAS];
+        imgCartas        = new ImageView[TOTAL_CARTAS];
+
+        glMemoria.removeAllViews();
+        glMemoria.setColumnCount(COLS_MEM);
+        glMemoria.setRowCount(2);
+
+        for (int i = 0; i < TOTAL_CARTAS; i++) {
+            final int idx = i;
+
+            FrameLayout frame = new FrameLayout(this);
+            frame.setFocusable(true);
+            frame.setFocusableInTouchMode(true);
+            frame.setBackgroundResource(R.drawable.carta_verso_bg);
+
+            GridLayout.LayoutParams glp = new GridLayout.LayoutParams();
+            glp.columnSpec = GridLayout.spec(i % COLS_MEM, 1f);
+            glp.rowSpec    = GridLayout.spec(i / COLS_MEM, 1f);
+            glp.width  = 0;
+            glp.height = 0;
+            glp.setMargins(dp(5), dp(5), dp(5), dp(5));
+            frame.setLayoutParams(glp);
+
+            ImageView iv = new ImageView(this);
+            iv.setLayoutParams(new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT
+            ));
+            iv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            iv.setImageResource(CARTA_VERSO);
+            frame.addView(iv);
+
+            frame.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                    focadoMem = idx;
+                    processarCarta(idx);
+                }
+            });
+            frame.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override public void onFocusChange(View v, boolean hasFocus) {
+                    if (hasFocus) focadoMem = idx;
+                }
+            });
+
+            frameCartas[i] = frame;
+            imgCartas[i]   = iv;
+            glMemoria.addView(frame);
+            AnimHelper.zoomEntrada(frame, i * 55);
+        }
+
+        AnimHelper.fadeIn(glMemoria, 150);
+        mostrarFeedback("\u2728 Encontre os 6 pares para causar dano massivo!", 0xFFCE93D8);
+
+        handler.postDelayed(new Runnable() {
+            @Override public void run() {
+                if (glMemoria.getChildAt(0) != null)
+                    glMemoria.getChildAt(0).requestFocus();
+            }
+        }, 400);
+    }
+
+    private void processarCarta(final int idx) {
+        if (bloqMem || batalhaTerminou) return;
+        if (cartasEncontradas[idx] || cartasViradas[idx]) return;
+        if (primeiraCarta != -1 && segundaCarta != -1) return;
+
         sound.playCartaVirou();
-        AnimHelper.flipCarta(btn, new AnimHelper.OnHalfFlip() {
-            @Override
-            public void onHalf() {
-                btn.setText(EMOJIS_BATALHA[valor]);
+        cartasViradas[idx] = true;
+        final int val = valoresCartas.get(idx);
+        final FrameLayout frame = frameCartas[idx];
+        final ImageView   iv    = imgCartas[idx];
+
+        AnimHelper.flipCarta(frame, new AnimHelper.OnHalfFlip() {
+            @Override public void onHalf() {
+                iv.setImageResource(CARTAS_FRENTE[val]);
             }
         });
 
-        if (primeiraBat == -1) {
-            primeiraBat = indice;
+        if (primeiraCarta == -1) {
+            primeiraCarta = idx;
         } else {
-            segundaBat = indice;
-            bloqueadoBat = true;
+            segundaCarta = idx;
+            bloqMem = true;
             handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    verificarParBatalha();
-                }
-            }, 380);
+                @Override public void run() { verificarPar(); }
+            }, 750);
         }
     }
 
-    private void verificarParBatalha() {
-        int val1 = listaValoresBat.get(primeiraBat);
-        int val2 = listaValoresBat.get(segundaBat);
+    private void verificarPar() {
+        final int v1   = valoresCartas.get(primeiraCarta);
+        final int v2   = valoresCartas.get(segundaCarta);
+        final int idx1 = primeiraCarta;
+        final int idx2 = segundaCarta;
+        primeiraCarta = -1;
+        segundaCarta  = -1;
 
-        final int idx1 = primeiraBat;
-        final int idx2 = segundaBat;
-        primeiraBat = -1;
-        segundaBat  = -1;
-
-        if (val1 == val2) {
-            // Par certo → pulso + som + dano no bruxo
+        if (v1 == v2) {
             sound.playAcerto();
-            AnimHelper.pulseGold(botoesBat[idx1]);
-            AnimHelper.pulseGold(botoesBat[idx2]);
+            cartasEncontradas[idx1] = true;
+            cartasEncontradas[idx2] = true;
+            AnimHelper.pulseGold(frameCartas[idx1]);
+            AnimHelper.pulseGold(frameCartas[idx2]);
 
             handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    botoesBat[idx1].setEnabled(false);
-                    botoesBat[idx2].setEnabled(false);
-                    paresEncontradosBat++;
-                    bloqueadoBat = false;
-
-                    causarDano(false);
-
-                    if (hpInimigo <= 0) {
-                        finalizarBatalha(true);
-                        return;
-                    }
-
-                    if (paresEncontradosBat == TOTAL_PARES_BAT) {
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                iniciarFase2();
-                            }
-                        }, 800);
-                    }
+                @Override public void run() {
+                    frameCartas[idx1].setAlpha(0.55f);
+                    frameCartas[idx2].setAlpha(0.55f);
                 }
-            }, 220);
+            }, 280);
+
+            paresEncontrados++;
+            bloqMem = false;
+            mostrarFeedback("\u2728 Par encontrado! (" + paresEncontrados + "/" + TOTAL_PARES + ")", 0xFFCE93D8);
+
+            if (paresEncontrados >= TOTAL_PARES) {
+                final int dano = 40 + rng.nextInt(21);
+                hpBruxo = Math.max(0, hpBruxo - dano);
+                atualizarHP();
+                AnimHelper.flashRed(tvHpBruxo);
+                sound.playVitoria();
+                mostrarFeedback("\u2728 MAGIA TOTAL! Bruxo perdeu " + dano + " HP!", 0xFFCE93D8);
+
+                if (hpBruxo <= 0) {
+                    handler.postDelayed(new Runnable() {
+                        @Override public void run() { finalizarBatalha(true); }
+                    }, 1200);
+                } else {
+                    handler.postDelayed(new Runnable() {
+                        @Override public void run() { iniciarModoPalavra(); }
+                    }, 1600);
+                }
+            }
 
         } else {
-            // Par errado → shake + som + dano na Helena
             sound.playErro();
-            AnimHelper.shake(botoesBat[idx1]);
-            AnimHelper.shake(botoesBat[idx2]);
+            final int dano = 6 + rng.nextInt(8);
+            hpHelena = Math.max(0, hpHelena - dano);
+            atualizarHP();
             AnimHelper.flashRed(tvHpHelena);
+            AnimHelper.shake(tvFeedback);
+            mostrarFeedback("Par errado! Bruxo contra-atacou: -" + dano + " HP", 0xFFFF8A80);
 
-            causarDano(true);
-
-            if (hpHelena <= 0) {
-                handler.postDelayed(new Runnable() {
-                    @Override public void run() { finalizarBatalha(false); }
-                }, 500);
-                return;
-            }
+            cartasViradas[idx1] = false;
+            cartasViradas[idx2] = false;
 
             handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    // Flip de volta
-                    AnimHelper.flipCarta(botoesBat[idx1], new AnimHelper.OnHalfFlip() {
-                        @Override public void onHalf() { botoesBat[idx1].setText("?"); }
+                @Override public void run() {
+                    AnimHelper.flipCarta(frameCartas[idx1], new AnimHelper.OnHalfFlip() {
+                        @Override public void onHalf() { imgCartas[idx1].setImageResource(CARTA_VERSO); }
                     });
-                    AnimHelper.flipCarta(botoesBat[idx2], new AnimHelper.OnHalfFlip() {
-                        @Override public void onHalf() { botoesBat[idx2].setText("?"); }
+                    AnimHelper.flipCarta(frameCartas[idx2], new AnimHelper.OnHalfFlip() {
+                        @Override public void onHalf() { imgCartas[idx2].setImageResource(CARTA_VERSO); }
                     });
-                    bloqueadoBat = false;
+                    bloqMem = false;
+                    if (hpHelena <= 0) finalizarBatalha(false);
                 }
-            }, DELAY_FECHAR);
+            }, 600);
         }
     }
 
-    // ════════════════════════════════════════════
-    // FASE 2 — PALAVRAS
-    // ════════════════════════════════════════════
-
-    private void iniciarFase2() {
-        fase = 2;
-        perguntaAtualBat = 0;
-        tvFase.setText("FASE 2\nPalavras");
-
-        // Animação de transição de fase
-        AnimHelper.celebracao(tvFase);
-        sound.playBatalhaInicio();
-
-        gridBatalha.setVisibility(View.GONE);
-        llPalavrasBatalha.setVisibility(View.VISIBLE);
-        AnimHelper.fadeIn(llPalavrasBatalha, 300);
-
-        mostrarPerguntaBatalha();
-    }
-
-    private void mostrarPerguntaBatalha() {
-        if (perguntaAtualBat >= indicesPalavras.size()) {
-            finalizarBatalha(hpHelena > hpInimigo);
-            return;
-        }
-
-        aguardandoProximaBat = false;
-        opcaoFocadaBat = 0;
-
-        int idx = indicesPalavras.get(perguntaAtualBat);
-        String[] dados = BANCO_PALAVRAS[idx];
-
-        String lacuna = dados[0];
-        StringBuilder sb = new StringBuilder();
-        for (char c : lacuna.toCharArray()) {
-            if (sb.length() > 0) sb.append("  ");
-            sb.append(c);
-        }
-
-        tvPerguntaBatalha.setText("Pergunta " + (perguntaAtualBat + 1) + " de 3");
-        tvPalavraBatalha.setText(sb.toString());
-        tvResultado.setText(dados[1]);
-        tvResultado.setTextColor(0xFFCE93D8);
-
-        AnimHelper.fadeIn(tvPalavraBatalha, 250);
-
-        for (int i = 0; i < 4; i++) {
-            btnBat[i].setText(dados[2 + i]);
-            btnBat[i].setEnabled(true);
-            btnBat[i].setTextColor(0xFFFFFFFF);
-            AnimHelper.zoomEntrada(btnBat[i], i * 60);
-        }
-
-        btnBat[0].requestFocus();
-    }
-
-    private void verificarRespostaPalavra(int opcaoEscolhida) {
-        if (aguardandoProximaBat) return;
-
-        int idx = indicesPalavras.get(perguntaAtualBat);
-        String[] dados = BANCO_PALAVRAS[idx];
-        int correta = Integer.parseInt(dados[6]);
-
-        for (Button btn : btnBat) btn.setEnabled(false);
-        aguardandoProximaBat = true;
-
-        if (opcaoEscolhida == correta) {
-            tvResultado.setText("\u2694 Correto! Bruxo leva 1 de dano!");
-            tvResultado.setTextColor(0xFF4CAF50);
-
-            sound.playAcerto();
-            AnimHelper.pulseGold(btnBat[opcaoEscolhida]);
-            AnimHelper.pulseGold(tvPalavraBatalha);
-
-            causarDano(false);
-            AnimHelper.flashRed(tvHpInimigo);
-
-            if (hpInimigo <= 0) {
-                handler.postDelayed(new Runnable() {
-                    @Override public void run() { finalizarBatalha(true); }
-                }, 600);
-                return;
-            }
-        } else {
-            tvResultado.setText("\uD83D\uDCA5 Errado! Helena leva 1 de dano! Era: " + dados[2 + correta]);
-            tvResultado.setTextColor(0xFFEF5350);
-
-            sound.playErro();
-            AnimHelper.shake(tvPalavraBatalha);
-            AnimHelper.flashRed(btnBat[opcaoEscolhida]);
-
-            causarDano(true);
-            AnimHelper.flashRed(tvHpHelena);
-
-            if (hpHelena <= 0) {
-                handler.postDelayed(new Runnable() {
-                    @Override public void run() { finalizarBatalha(false); }
-                }, 600);
-                return;
-            }
-        }
-
-        perguntaAtualBat++;
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mostrarPerguntaBatalha();
-            }
-        }, 1400);
-    }
-
-    // ════════════════════════════════════════════
-    // HP e RESULTADO
-    // ════════════════════════════════════════════
-
-    private void causarDano(boolean helenaTomaDano) {
-        if (helenaTomaDano) {
-            hpHelena = Math.max(0, hpHelena - 1);
-        } else {
-            hpInimigo = Math.max(0, hpInimigo - 1);
-        }
-        sound.playDano(helenaTomaDano);
-        atualizarHP();
-    }
+    // ═══════════════════════════════════════════════════════════
+    // HP & FIM
+    // ═══════════════════════════════════════════════════════════
 
     private void atualizarHP() {
-        tvHpHelena.setText("HP: " + hpHelena + "/" + HP_MAX);
-        tvHpInimigo.setText("HP: " + hpInimigo + "/" + HP_MAX);
+        tvHpHelena.setText("HELENA  " + hpHelena + "/" + HP_HELENA_MAX);
+        tvHpBruxo.setText("BRUXO  "  + hpBruxo  + "/" + HP_BRUXO_MAX);
+        AnimHelper.animarXP(pbHpHelena, pbHpHelena.getProgress(), hpHelena);
+        AnimHelper.animarXP(pbHpBruxo,  pbHpBruxo.getProgress(),  hpBruxo);
+        tvHpHelena.setTextColor(hpHelena > 30 ? 0xFF4CAF50 : 0xFFEF5350);
+        tvHpBruxo.setTextColor(hpBruxo   > 50 ? 0xFFCE93D8 : 0xFFEF5350);
+    }
 
-        tvHpHelena.setTextColor(hpHelena <= 1 ? 0xFFEF5350 : 0xFF4CAF50);
-        tvHpInimigo.setTextColor(hpInimigo <= 1 ? 0xFFEF5350 : 0xFF4CAF50);
+    private void mostrarFeedback(String msg, int cor) {
+        tvFeedback.setText(msg);
+        tvFeedback.setTextColor(cor);
     }
 
     private void finalizarBatalha(final boolean helenaGanhou) {
-        bloqueadoBat = true;
-        aguardandoProximaBat = true;
+        if (batalhaTerminou) return;
+        batalhaTerminou = true;
+        bloqueado = true;
 
         if (helenaGanhou) {
             perfil.setBatalhaStatus("ganhou");
@@ -457,121 +628,132 @@ public class BatalhaActivity extends Activity {
             perfil.addStatInteligencia(5);
             perfil.addStatFoco(5);
             perfil.addStatResponsabilidade(5);
-
-            // Som de vitória
             sound.playVitoria();
             handler.postDelayed(new Runnable() {
                 @Override public void run() { sound.playNivelUp(); }
             }, 800);
-            AnimHelper.celebracao(tvResultado);
+            AnimHelper.celebracao(tvFeedback);
+            mostrarFeedback("\uD83C\uDFC6 VITORIA! Bruxo derrotado!", 0xFFFFD700);
         } else {
             perfil.setBatalhaStatus("perdeu");
             sound.playDerrota();
+            mostrarFeedback("\uD83D\uDCA4 Derrota... tente amanha!", 0xFFEF5350);
         }
 
-        tvResultado.setText(helenaGanhou
-            ? "\uD83C\uDFC6 VITORIA! Bruxo derrotado!"
-            : "\uD83D\uDCA4 Derrota... tente amanha!");
-        tvResultado.setTextColor(helenaGanhou ? 0xFFFFD700 : 0xFFEF5350);
-
-        String titulo = helenaGanhou ? "VITORIA!" : "Que pena...";
-        String mensagem;
-
-        if (helenaGanhou) {
-            mensagem = "Parabens, Helena! Voce derrotou o Bruxo!\n\n"
-                + "Helena: " + hpHelena + "/" + HP_MAX + " HP restante\n\n"
-                + "+ 100 XP\n"
-                + "+ 5 em todas as stats!\n\n"
-                + "Voce e uma verdadeira heroina!";
-        } else {
-            mensagem = "O Bruxo foi mais forte dessa vez...\n\n"
-                + "Mas nao desista! Treine mais e tente amanha!\n"
-                + "Bruxo: " + hpInimigo + "/" + HP_MAX + " HP restante";
-        }
-
-        final String tituloFinal   = titulo;
-        final String mensagemFinal = mensagem;
+        final String titulo = helenaGanhou ? "VITORIA!" : "Que pena...";
+        final String mensagem = helenaGanhou
+            ? "Parabens, Helena! Voce derrotou o Bruxo!\n\n"
+              + "Helena: " + hpHelena + "/" + HP_HELENA_MAX + " HP\n\n"
+              + "+100 XP\n+5 em todas as stats!\n\n"
+              + "Voce e uma verdadeira heroina!"
+            : "O Bruxo foi mais forte dessa vez...\n\n"
+              + "Mas nao desista! Treine mais e tente amanha!\n"
+              + "Bruxo: " + hpBruxo + "/" + HP_BRUXO_MAX + " HP restante";
 
         handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
+            @Override public void run() {
                 if (!isFinishing()) {
                     AlertDialog.Builder b = new AlertDialog.Builder(BatalhaActivity.this);
-                    b.setTitle(tituloFinal);
-                    b.setMessage(mensagemFinal);
+                    b.setTitle(titulo);
+                    b.setMessage(mensagem);
                     b.setCancelable(false);
                     b.setNegativeButton("Voltar ao Hub", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            finish();
-                        }
+                        @Override public void onClick(DialogInterface d, int w) { finish(); }
                     });
                     b.show();
                 }
             }
-        }, 1600);
+        }, 1800);
     }
 
-    // ════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════
     // NAVEGAÇÃO D-PAD
-    // ════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (fase == 1) {
-            int novoIndice = indiceFocadoBat;
-            switch (keyCode) {
-                case KeyEvent.KEYCODE_DPAD_RIGHT:
-                    if ((indiceFocadoBat % COLUNAS_BAT) < COLUNAS_BAT - 1)
-                        novoIndice = indiceFocadoBat + 1;
-                    break;
-                case KeyEvent.KEYCODE_DPAD_LEFT:
-                    if ((indiceFocadoBat % COLUNAS_BAT) > 0)
-                        novoIndice = indiceFocadoBat - 1;
-                    break;
-                case KeyEvent.KEYCODE_DPAD_DOWN:
-                    if (indiceFocadoBat + COLUNAS_BAT < TOTAL_CARTAS_BAT)
-                        novoIndice = indiceFocadoBat + COLUNAS_BAT;
-                    break;
-                case KeyEvent.KEYCODE_DPAD_UP:
-                    if (indiceFocadoBat - COLUNAS_BAT >= 0)
-                        novoIndice = indiceFocadoBat - COLUNAS_BAT;
-                    break;
-                case KeyEvent.KEYCODE_DPAD_CENTER:
-                case KeyEvent.KEYCODE_ENTER:
-                    processarCliqueMemoria(indiceFocadoBat);
-                    return true;
-                default:
-                    return super.onKeyDown(keyCode, event);
-            }
-            if (novoIndice != indiceFocadoBat && botoesBat != null) {
-                indiceFocadoBat = novoIndice;
-                botoesBat[indiceFocadoBat].requestFocus();
-            }
-            return true;
+        if (batalhaTerminou) return super.onKeyDown(keyCode, event);
+        return modoBatalha == MODO_PALAVRA ? navegarPalavra(keyCode) : navegarMemoria(keyCode);
+    }
 
-        } else {
-            if (aguardandoProximaBat) return true;
+    private boolean navegarPalavra(int keyCode) {
+        if (aguardandoProxima || bloqueado) return true;
+
+        if (magiaBotaoFocado) {
             switch (keyCode) {
-                case KeyEvent.KEYCODE_DPAD_RIGHT:
-                    if (opcaoFocadaBat < 3) {
-                        opcaoFocadaBat++;
-                        btnBat[opcaoFocadaBat].requestFocus();
-                    }
-                    return true;
-                case KeyEvent.KEYCODE_DPAD_LEFT:
-                    if (opcaoFocadaBat > 0) {
-                        opcaoFocadaBat--;
-                        btnBat[opcaoFocadaBat].requestFocus();
-                    }
+                case KeyEvent.KEYCODE_DPAD_UP:
+                    magiaBotaoFocado = false;
+                    opcaoFocada = 0;
+                    botoesOpcao[opcaoFocada].requestFocus();
                     return true;
                 case KeyEvent.KEYCODE_DPAD_CENTER:
                 case KeyEvent.KEYCODE_ENTER:
-                    verificarRespostaPalavra(opcaoFocadaBat);
+                    ativarMagia();
                     return true;
                 default:
-                    return super.onKeyDown(keyCode, event);
+                    return true;
             }
         }
+
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                if (opcaoFocada < 3) { opcaoFocada++; botoesOpcao[opcaoFocada].requestFocus(); }
+                return true;
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                if (opcaoFocada > 0) { opcaoFocada--; botoesOpcao[opcaoFocada].requestFocus(); }
+                return true;
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                if (magiaDisp) { magiaBotaoFocado = true; btnMagia.requestFocus(); }
+                return true;
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+            case KeyEvent.KEYCODE_ENTER:
+                responderLetra(opcaoFocada);
+                return true;
+            default:
+                return super.onKeyDown(keyCode, event);
+        }
+    }
+
+    private boolean navegarMemoria(int keyCode) {
+        if (bloqMem) return true;
+        int novo = focadoMem;
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                if (focadoMem % COLS_MEM < COLS_MEM - 1) novo = focadoMem + 1;
+                break;
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                if (focadoMem % COLS_MEM > 0) novo = focadoMem - 1;
+                break;
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                if (focadoMem + COLS_MEM < TOTAL_CARTAS) novo = focadoMem + COLS_MEM;
+                break;
+            case KeyEvent.KEYCODE_DPAD_UP:
+                if (focadoMem - COLS_MEM >= 0) novo = focadoMem - COLS_MEM;
+                break;
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+            case KeyEvent.KEYCODE_ENTER:
+                processarCarta(focadoMem);
+                return true;
+            default:
+                return super.onKeyDown(keyCode, event);
+        }
+        if (novo != focadoMem && glMemoria != null && glMemoria.getChildAt(novo) != null) {
+            focadoMem = novo;
+            glMemoria.getChildAt(focadoMem).requestFocus();
+        }
+        return true;
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // UTILITÁRIOS
+    // ═══════════════════════════════════════════════════════════
+
+    private boolean contem(int[] arr, int val) {
+        for (int x : arr) if (x == val) return true;
+        return false;
+    }
+
+    private int dp(int dp) {
+        return Math.round(dp * getResources().getDisplayMetrics().density);
     }
 }
