@@ -42,8 +42,7 @@
                 android:layout_height="12dp"
                 android:max="100"
                 android:progress="100"
-                android:progressTint="#4CAF50"
-                android:progressBackgroundTint="#1B3A1B" />
+                android:progressDrawable="@drawable/pb_helena" />
         </LinearLayout>
 
         <!-- VS -->
@@ -83,8 +82,7 @@
                 android:layout_height="12dp"
                 android:max="150"
                 android:progress="150"
-                android:progressTint="#9C27B0"
-                android:progressBackgroundTint="#2D0040" />
+                android:progressDrawable="@drawable/pb_bruxo" />
         </LinearLayout>
 
     </LinearLayout>
