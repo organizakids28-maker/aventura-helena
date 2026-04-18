@@ -710,7 +710,7 @@ public class BatalhaActivity extends Activity {
                 responderLetra(opcaoFocada);
                 return true;
             default:
-                return super.onKeyDown(keyCode, event);
+                return false;
         }
     }
 
@@ -735,7 +735,7 @@ public class BatalhaActivity extends Activity {
                 processarCarta(focadoMem);
                 return true;
             default:
-                return super.onKeyDown(keyCode, event);
+                return false;
         }
         if (novo != focadoMem && glMemoria != null && glMemoria.getChildAt(novo) != null) {
             focadoMem = novo;
