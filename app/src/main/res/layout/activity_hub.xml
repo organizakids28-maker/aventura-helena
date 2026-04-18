@@ -31,12 +31,13 @@
             android:gravity="center"
             android:layout_marginBottom="10dp" />
 
-        <!-- Avatar da Helena (foto real — círculo aplicado via Java) -->
+        <!-- Avatar da Helena (foto normal, sem recorte) -->
         <ImageView
             android:id="@+id/iv_avatar"
             android:layout_width="160dp"
             android:layout_height="160dp"
-            android:scaleType="fitCenter"
+            android:src="@drawable/helena_avatar"
+            android:scaleType="centerCrop"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="8dp" />
 
