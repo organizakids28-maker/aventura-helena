@@ -5,19 +5,21 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 /**
  * HubActivity — Tela principal da Aventura da Helena.
  *
- * Mostra o perfil da Helena (XP, nível, stats) e os botões para os mini-jogos,
- * tarefas de casa e batalha final.
+ * Mostra o perfil da Helena (XP, nível, stats) e os cards coloridos
+ * para cada mini-jogo (azul=Memória, roxo=Palavras, laranja=Tarefas).
  *
- * Navegação pelo controle remoto:
- * - Cima/Baixo: navega entre os botões
- * - OK/Enter: abre o mini-jogo ou ação selecionada
+ * Navegação D-pad:
+ * - Esquerda/Direita: navega entre os 3 cards de jogos (linha de cima)
+ * - Baixo: vai para o card da Batalha (quando disponível)
+ * - Cima: volta para os cards de jogos
+ * - OK/Enter: entra no jogo selecionado
  */
 public class HubActivity extends Activity {
 
@@ -25,18 +27,24 @@ public class HubActivity extends Activity {
 
     private PerfilHelena perfil;
 
+    // Views do perfil
     private TextView tvNivel;
     private TextView tvXP;
     private ProgressBar pbXP;
     private TextView tvInt;
     private TextView tvFoc;
     private TextView tvRes;
-    private TextView tvChecklist;
-    private Button btnBatalha;
 
-    // Botões de ação (para navegação manual no D-pad)
-    private Button[] botoesAcao;
+    // Views dos cards
+    private TextView tvSubTarefas;
+    private TextView tvChecklist;
+    private TextView tvChecklistTitulo;
+    private LinearLayout cardBatalha;
+
+    // Cards navegáveis: 0=Memória, 1=Palavras, 2=Tarefas, 3=Batalha
+    private View[] cards;
     private int indiceFocado = 0;
+    private boolean linhaInferior = false; // true = foco na batalha
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,70 +53,83 @@ public class HubActivity extends Activity {
 
         perfil = new PerfilHelena(this);
 
-        // Referências às views
-        tvNivel     = (TextView)  findViewById(R.id.tv_nivel);
-        tvXP        = (TextView)  findViewById(R.id.tv_xp);
-        pbXP        = (ProgressBar) findViewById(R.id.pb_xp);
-        tvInt       = (TextView)  findViewById(R.id.tv_int);
-        tvFoc       = (TextView)  findViewById(R.id.tv_foc);
-        tvRes       = (TextView)  findViewById(R.id.tv_res);
-        tvChecklist = (TextView)  findViewById(R.id.tv_checklist);
-        btnBatalha  = (Button)    findViewById(R.id.btn_batalha);
+        // Referências às views do perfil
+        tvNivel   = (TextView)    findViewById(R.id.tv_nivel);
+        tvXP      = (TextView)    findViewById(R.id.tv_xp);
+        pbXP      = (ProgressBar) findViewById(R.id.pb_xp);
+        tvInt     = (TextView)    findViewById(R.id.tv_int);
+        tvFoc     = (TextView)    findViewById(R.id.tv_foc);
+        tvRes     = (TextView)    findViewById(R.id.tv_res);
 
-        Button btnMemoria = (Button) findViewById(R.id.btn_memoria);
-        Button btnPalavras = (Button) findViewById(R.id.btn_palavras);
-        Button btnTarefas  = (Button) findViewById(R.id.btn_tarefas);
+        // Referências dos cards e textos dinâmicos
+        tvSubTarefas       = (TextView)      findViewById(R.id.tv_sub_tarefas);
+        tvChecklist        = (TextView)      findViewById(R.id.tv_checklist);
+        tvChecklistTitulo  = (TextView)      findViewById(R.id.tv_checklist_titulo);
+        cardBatalha        = (LinearLayout)  findViewById(R.id.card_batalha);
 
-        // Array de botões para navegação D-pad (ordem de cima para baixo)
-        botoesAcao = new Button[]{btnMemoria, btnPalavras, btnTarefas, btnBatalha};
+        LinearLayout cardMemoria  = (LinearLayout) findViewById(R.id.card_memoria);
+        LinearLayout cardPalavras = (LinearLayout) findViewById(R.id.card_palavras);
+        LinearLayout cardTarefas  = (LinearLayout) findViewById(R.id.card_tarefas);
 
-        // Configura cliques
-        btnMemoria.setOnClickListener(new View.OnClickListener() {
+        // Array de cards (linha superior)
+        cards = new View[]{cardMemoria, cardPalavras, cardTarefas};
+
+        // ─── Configura cliques dos cards ───
+        cardMemoria.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(HubActivity.this, MemoriaActivity.class));
             }
         });
 
-        btnPalavras.setOnClickListener(new View.OnClickListener() {
+        cardPalavras.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(HubActivity.this, PalavraActivity.class));
             }
         });
 
-        btnTarefas.setOnClickListener(new View.OnClickListener() {
+        cardTarefas.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(HubActivity.this, TarefasActivity.class));
             }
         });
 
-        btnBatalha.setOnClickListener(new View.OnClickListener() {
+        cardBatalha.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(HubActivity.this, BatalhaActivity.class));
             }
         });
 
-        // Registra qual botão está em foco
-        for (int i = 0; i < botoesAcao.length; i++) {
+        // Rastreia qual card está em foco
+        for (int i = 0; i < cards.length; i++) {
             final int idx = i;
-            botoesAcao[i].setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            cards[i].setOnFocusChangeListener(new View.OnFocusChangeListener() {
                 @Override
                 public void onFocusChange(View v, boolean hasFocus) {
-                    if (hasFocus) indiceFocado = idx;
+                    if (hasFocus) {
+                        indiceFocado = idx;
+                        linhaInferior = false;
+                    }
                 }
             });
         }
 
-        // Foco inicial no primeiro botão
-        btnMemoria.requestFocus();
+        cardBatalha.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) linhaInferior = true;
+            }
+        });
+
+        // Foco inicial no card da Memória
+        cardMemoria.requestFocus();
     }
 
     /**
-     * onResume é chamado sempre que voltamos para esta tela (ex: após terminar um mini-jogo).
-     * Atualiza todas as informações do perfil.
+     * Atualiza toda a UI sempre que voltamos ao hub (após terminar um mini-jogo).
      */
     @Override
     protected void onResume() {
@@ -118,17 +139,17 @@ public class HubActivity extends Activity {
     }
 
     /**
-     * Atualiza todos os elementos visuais do hub com os dados atuais da Helena.
+     * Atualiza todas as informações do perfil e estado dos cards.
      */
     private void atualizarUI() {
-        int nivel = perfil.getNivel();
+        int nivel     = perfil.getNivel();
         String titulo = perfil.getTitulo();
-        int xp = perfil.getXP();
-        int xpPct = perfil.getXPPorcentagem();
+        int xp        = perfil.getXP();
+        int xpPct     = perfil.getXPPorcentagem();
 
-        // Nível e XP
-        tvNivel.setText("Nivel " + nivel + " - " + titulo);
-        tvXP.setText(xp + " XP");
+        // Perfil
+        tvNivel.setText("Nivel " + nivel + " \u2022 " + titulo);
+        tvXP.setText(xp + " XP \u2192 Nivel " + (nivel + 1));
         pbXP.setProgress(xpPct);
 
         // Stats
@@ -136,73 +157,95 @@ public class HubActivity extends Activity {
         tvFoc.setText(String.valueOf(perfil.getStatFoco()));
         tvRes.setText(String.valueOf(perfil.getStatResponsabilidade()));
 
-        // Checklist de batalha
-        boolean memoria   = perfil.isMemoriaConcluida();
-        boolean palavras  = perfil.isPalavrasConcluida();
+        // Subtítulo do card de tarefas (mostra quantas feitas)
         int tarefasFeitas = perfil.getQuantidadeTarefasFeitas();
-        String statusBatalha = perfil.getBatalhaStatus();
+        if (tarefasFeitas >= TOTAL_TAREFAS) {
+            tvSubTarefas.setText("Tudo feito! \u2705");
+        } else {
+            tvSubTarefas.setText(tarefasFeitas + "/" + TOTAL_TAREFAS + " feitas");
+        }
 
-        StringBuilder sb = new StringBuilder();
+        // Estado da batalha
+        String statusBatalha = perfil.getBatalhaStatus();
+        boolean memoria      = perfil.isMemoriaConcluida();
+        boolean palavras     = perfil.isPalavrasConcluida();
+
+        StringBuilder checklist = new StringBuilder();
 
         if (!statusBatalha.isEmpty()) {
-            // Batalha já foi feita hoje
+            tvChecklistTitulo.setText("Batalha de hoje:");
             if ("ganhou".equals(statusBatalha)) {
-                sb.append("Voce venceu a batalha hoje! Parabens!");
+                checklist.append("\uD83C\uDFC6 Voce venceu o Bruxo hoje! Parabens!");
             } else {
-                sb.append("Batalha perdida hoje. Tente amanha!");
+                checklist.append("\uD83D\uDE22 Derrota... Tente amanha com mais forca!");
             }
         } else {
-            // Mostra o que falta para desbloquear
-            sb.append(memoria  ? "[OK] Memoria\n"  : "[  ] Memoria - complete o jogo!\n");
-            sb.append(palavras ? "[OK] Palavras\n" : "[  ] Palavras - complete o jogo!\n");
-            sb.append("Tarefas: " + tarefasFeitas + "/" + TOTAL_TAREFAS + "\n");
-
-            if (!memoria || !palavras || tarefasFeitas < TOTAL_TAREFAS) {
-                sb.append("\nComplete tudo para desbloquear a batalha!");
-            }
+            tvChecklistTitulo.setText("Complete tudo para desbloquear a Batalha:");
+            checklist.append(memoria  ? "\u2705 Memoria\n"  : "\u2B1C Memoria — jogue para desbloquear\n");
+            checklist.append(palavras ? "\u2705 Palavras\n" : "\u2B1C Palavras — jogue para desbloquear\n");
+            checklist.append("Tarefas: " + tarefasFeitas + "/" + TOTAL_TAREFAS);
         }
 
-        tvChecklist.setText(sb.toString());
+        tvChecklist.setText(checklist.toString().trim());
 
-        // Mostrar ou esconder botão de batalha
-        boolean batalhaDesbloqueada = perfil.batalhaDesbloqueada(TOTAL_TAREFAS);
-        if (batalhaDesbloqueada) {
-            btnBatalha.setVisibility(View.VISIBLE);
-            // Atualiza lista de botões para incluir a batalha
-        } else {
-            btnBatalha.setVisibility(View.GONE);
-        }
+        // Mostra ou esconde o card da batalha
+        boolean desbloqueada = perfil.batalhaDesbloqueada(TOTAL_TAREFAS);
+        cardBatalha.setVisibility(desbloqueada ? View.VISIBLE : View.GONE);
     }
 
     /**
-     * Intercepta o D-pad para navegar entre os botões de ação.
+     * Navegação D-pad pelos cards.
+     *
+     * Layout:
+     * [Memória] [Palavras] [Tarefas]   ← linha superior (left/right)
+     *       [⚔️ BATALHAR!]             ← linha inferior (down/up)
      */
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        // Descobre quantos botões estão visíveis
-        int totalBotoes = 3; // memoria, palavras, tarefas
-        if (btnBatalha.getVisibility() == View.VISIBLE) {
-            totalBotoes = 4;
-        }
+        boolean batalhaVisivel = cardBatalha.getVisibility() == View.VISIBLE;
 
         switch (keyCode) {
-            case KeyEvent.KEYCODE_DPAD_DOWN:
-                if (indiceFocado < totalBotoes - 1) {
+
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                if (!linhaInferior && indiceFocado < 2) {
                     indiceFocado++;
-                    botoesAcao[indiceFocado].requestFocus();
+                    cards[indiceFocado].requestFocus();
+                }
+                return true;
+
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                if (!linhaInferior && indiceFocado > 0) {
+                    indiceFocado--;
+                    cards[indiceFocado].requestFocus();
+                } else if (linhaInferior) {
+                    // De baixo, vai pro card do meio
+                    linhaInferior = false;
+                    indiceFocado = 1;
+                    cards[indiceFocado].requestFocus();
+                }
+                return true;
+
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                if (!linhaInferior && batalhaVisivel) {
+                    linhaInferior = true;
+                    cardBatalha.requestFocus();
                 }
                 return true;
 
             case KeyEvent.KEYCODE_DPAD_UP:
-                if (indiceFocado > 0) {
-                    indiceFocado--;
-                    botoesAcao[indiceFocado].requestFocus();
+                if (linhaInferior) {
+                    linhaInferior = false;
+                    cards[indiceFocado].requestFocus();
                 }
                 return true;
 
             case KeyEvent.KEYCODE_DPAD_CENTER:
             case KeyEvent.KEYCODE_ENTER:
-                botoesAcao[indiceFocado].performClick();
+                if (linhaInferior) {
+                    cardBatalha.performClick();
+                } else {
+                    cards[indiceFocado].performClick();
+                }
                 return true;
         }
 
