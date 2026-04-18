@@ -14,21 +14,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * PalavraActivity — Jogo "Complete a Palavra" para a Aventura da Helena.
- *
- * 15 palavras no total. Para cada palavra, a criança vê a palavra com uma letra
- * faltando e 4 opções de resposta. Navega com o D-pad e confirma com OK.
- *
- * Ao completar todas: ganha XP e stat de Inteligência.
- */
 public class PalavraActivity extends Activity {
 
     private static final int XP_GANHO       = 50;
     private static final int STAT_INT_GANHO = 4;
-    private static final int DELAY_PROXIMO  = 1200;
+    private static final int DELAY_PROXIMO  = 1300;
 
-    // Banco de palavras: {lacuna, dica, op0, op1, op2, op3, indiceCorreto}
     private static final String[][] BANCO = {
         {"G_TO",    "Animal que mia",              "GATO",   "PATO",   "RATO",   "BOLO",   "0"},
         {"C_SA",    "Onde moramos",                "BASA",   "CASA",   "MADA",   "FASA",   "1"},
@@ -47,7 +38,6 @@ public class PalavraActivity extends Activity {
         {"AM_R",    "Sentimento muito bom",        "AMOR",   "ABOR",   "ACOR",   "ADOR",   "0"},
     };
 
-    // Ordem embaralhada das perguntas
     private List<Integer> ordemPerguntas;
     private int perguntaAtual = 0;
     private int acertos = 0;
@@ -61,8 +51,8 @@ public class PalavraActivity extends Activity {
 
     private Handler handler;
     private PerfilHelena perfil;
+    private SoundManager sound;
 
-    // Para navegação D-pad entre as 4 opções
     private int opcaoFocada = 0;
 
     @Override
@@ -72,6 +62,7 @@ public class PalavraActivity extends Activity {
 
         perfil  = new PerfilHelena(this);
         handler = new Handler();
+        sound   = new SoundManager();
 
         tvProgresso = (TextView) findViewById(R.id.tv_progresso);
         tvDica      = (TextView) findViewById(R.id.tv_dica);
@@ -85,7 +76,6 @@ public class PalavraActivity extends Activity {
             (Button) findViewById(R.id.btn_op3)
         };
 
-        // Configura listeners das opções
         for (int i = 0; i < 4; i++) {
             final int idx = i;
             btnOpcoes[i].setOnClickListener(new View.OnClickListener() {
@@ -102,17 +92,23 @@ public class PalavraActivity extends Activity {
             });
         }
 
-        // Embaralha as perguntas
         ordemPerguntas = new ArrayList<Integer>();
         for (int i = 0; i < BANCO.length; i++) ordemPerguntas.add(i);
         Collections.shuffle(ordemPerguntas);
 
+        // Animação de entrada
+        View raiz = findViewById(android.R.id.content);
+        AnimHelper.fadeIn(tvPalavra, 350);
+
         mostrarPergunta();
     }
 
-    /**
-     * Exibe a pergunta atual na tela.
-     */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        sound.release();
+    }
+
     private void mostrarPergunta() {
         if (perguntaAtual >= BANCO.length) {
             mostrarResultadoFinal();
@@ -126,35 +122,33 @@ public class PalavraActivity extends Activity {
         String[] dados = BANCO[idx];
 
         String lacuna = dados[0];
-        String dica   = dados[1];
-
-        // Formata a lacuna para exibição (espaço entre cada letra)
         StringBuilder sb = new StringBuilder();
         for (char c : lacuna.toCharArray()) {
-            if (sb.length() > 0) sb.append(" ");
+            if (sb.length() > 0) sb.append("  ");
             sb.append(c);
         }
 
         tvProgresso.setText("Pergunta " + (perguntaAtual + 1) + " de " + BANCO.length);
-        tvDica.setText(dica);
-        tvPalavra.setText(sb.toString());
+        tvDica.setText(dados[1]);
         tvFeedback.setText("");
+        tvFeedback.setTextColor(0xFFCE93D8);
 
-        // Preenche as 4 opções
+        // Animação na palavra quando muda
+        AnimHelper.fadeIn(tvPalavra, 250);
+        tvPalavra.setText(sb.toString());
+
         for (int i = 0; i < 4; i++) {
             btnOpcoes[i].setText(dados[2 + i]);
             btnOpcoes[i].setEnabled(true);
             btnOpcoes[i].setTextColor(0xFFFFFFFF);
             btnOpcoes[i].setBackgroundResource(R.drawable.btn_action);
+            // Botões aparecem escalonados
+            AnimHelper.zoomEntrada(btnOpcoes[i], i * 60);
         }
 
-        // Coloca foco na primeira opção
         btnOpcoes[0].requestFocus();
     }
 
-    /**
-     * Verifica a resposta escolhida.
-     */
     private void verificarResposta(int opcaoEscolhida) {
         if (aguardandoProxima) return;
 
@@ -162,22 +156,34 @@ public class PalavraActivity extends Activity {
         String[] dados = BANCO[idx];
         int correta = Integer.parseInt(dados[6]);
 
-        // Desabilita todos os botões
         for (Button btn : btnOpcoes) btn.setEnabled(false);
 
         if (opcaoEscolhida == correta) {
             acertos++;
-            tvFeedback.setText("Correto! Muito bem!");
+            tvFeedback.setText("\u2705  Correto!  Muito bem!");
             tvFeedback.setTextColor(0xFF4CAF50);
+
+            // Som + animação de acerto
+            sound.playAcerto();
+            AnimHelper.pulseGold(btnOpcoes[opcaoEscolhida]);
+            AnimHelper.pulseGold(tvPalavra);
+
         } else {
-            tvFeedback.setText("Ops! Era: " + dados[2 + correta]);
+            tvFeedback.setText("\u274C  Ops! Era: " + dados[2 + correta]);
             tvFeedback.setTextColor(0xFFEF5350);
+
+            // Som + shake na palavra + flash no botão errado
+            sound.playErro();
+            AnimHelper.shake(tvPalavra);
+            AnimHelper.flashRed(btnOpcoes[opcaoEscolhida]);
         }
+
+        // Animação no feedback
+        AnimHelper.fadeIn(tvFeedback, 200);
 
         aguardandoProxima = true;
         perguntaAtual++;
 
-        // Avança para a próxima pergunta após delay
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -186,15 +192,19 @@ public class PalavraActivity extends Activity {
         }, DELAY_PROXIMO);
     }
 
-    /**
-     * Mostra o resultado final ao completar todas as 15 perguntas.
-     */
     private void mostrarResultadoFinal() {
-        // Salva progresso (só uma vez por dia)
         if (!perfil.isPalavrasConcluida()) {
             perfil.addXP(XP_GANHO);
             perfil.addStatInteligencia(STAT_INT_GANHO);
             perfil.setPalavrasConcluida();
+            sound.playVitoria();
+            if (perfil.getNivel() > 1) {
+                handler.postDelayed(new Runnable() {
+                    @Override public void run() { sound.playNivelUp(); }
+                }, 700);
+            }
+        } else {
+            sound.playXPGanho();
         }
 
         String mensagem =
@@ -203,14 +213,14 @@ public class PalavraActivity extends Activity {
             + "+ " + STAT_INT_GANHO + " Inteligencia\n\n";
 
         if (acertos >= 12) {
-            mensagem += "Incrivel! Voce eh uma expert em palavras!";
+            mensagem += "\uD83C\uDFC6 Incrivel! Voce eh uma expert em palavras!";
         } else if (acertos >= 8) {
-            mensagem += "Muito bem! Continue praticando!";
+            mensagem += "\uD83D\uDC4D Muito bem! Continue praticando!";
         } else {
-            mensagem += "Bom esforco! Tente novamente amanha!";
+            mensagem += "\uD83D\uDCAA Bom esforco! Tente novamente amanha!";
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Parabens, Helena!");
         builder.setMessage(mensagem);
         builder.setCancelable(false);
@@ -222,12 +232,14 @@ public class PalavraActivity extends Activity {
             }
         });
 
-        builder.show();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!isFinishing()) builder.show();
+            }
+        }, 400);
     }
 
-    /**
-     * Navegação D-pad entre as 4 opções de resposta.
-     */
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (aguardandoProxima) return true;
@@ -239,24 +251,20 @@ public class PalavraActivity extends Activity {
                     btnOpcoes[opcaoFocada].requestFocus();
                 }
                 return true;
-
             case KeyEvent.KEYCODE_DPAD_LEFT:
                 if (opcaoFocada > 0) {
                     opcaoFocada--;
                     btnOpcoes[opcaoFocada].requestFocus();
                 }
                 return true;
-
             case KeyEvent.KEYCODE_DPAD_CENTER:
             case KeyEvent.KEYCODE_ENTER:
                 verificarResposta(opcaoFocada);
                 return true;
-
             case KeyEvent.KEYCODE_BACK:
                 finish();
                 return true;
         }
-
         return super.onKeyDown(keyCode, event);
     }
 }
