@@ -10,7 +10,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -102,7 +101,7 @@ public class BatalhaActivity extends Activity {
     private static final int COLS_MEM    = 6;
     private static final int TOTAL_CARTAS = TOTAL_PARES * 2;
 
-    private GridLayout   glMemoria;
+    private LinearLayout glMemoria;
     private List<Integer> valoresCartas;
     private boolean[]    cartasViradas;
     private boolean[]    cartasEncontradas;
@@ -140,7 +139,7 @@ public class BatalhaActivity extends Activity {
         llModoPalavra = (LinearLayout) findViewById(R.id.ll_modo_palavra);
         llLetras     = (LinearLayout) findViewById(R.id.ll_letras);
         tvDica       = (TextView)   findViewById(R.id.tv_dica_palavra);
-        glMemoria    = (GridLayout)  findViewById(R.id.gl_memoria_batalha);
+        glMemoria    = (LinearLayout) findViewById(R.id.gl_memoria_batalha);
 
         botoesOpcao = new Button[]{
             (Button) findViewById(R.id.btn_op0),
@@ -442,8 +441,20 @@ public class BatalhaActivity extends Activity {
         imgCartas        = new ImageView[TOTAL_CARTAS];
 
         glMemoria.removeAllViews();
-        glMemoria.setColumnCount(COLS_MEM);
-        glMemoria.setRowCount(2);
+        glMemoria.setOrientation(LinearLayout.VERTICAL);
+
+        int linhas = TOTAL_CARTAS / COLS_MEM;
+        LinearLayout[] rowLayouts = new LinearLayout[linhas];
+        for (int r = 0; r < linhas; r++) {
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            LinearLayout.LayoutParams rp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 0);
+            rp.weight = 1f;
+            row.setLayoutParams(rp);
+            glMemoria.addView(row);
+            rowLayouts[r] = row;
+        }
 
         for (int i = 0; i < TOTAL_CARTAS; i++) {
             final int idx = i;
@@ -453,13 +464,11 @@ public class BatalhaActivity extends Activity {
             frame.setFocusableInTouchMode(true);
             frame.setBackgroundResource(R.drawable.carta_verso_bg);
 
-            GridLayout.LayoutParams glp = new GridLayout.LayoutParams();
-            glp.columnSpec = GridLayout.spec(i % COLS_MEM, 1f);
-            glp.rowSpec    = GridLayout.spec(i / COLS_MEM, 1f);
-            glp.width  = 0;
-            glp.height = 0;
-            glp.setMargins(dp(5), dp(5), dp(5), dp(5));
-            frame.setLayoutParams(glp);
+            LinearLayout.LayoutParams fp = new LinearLayout.LayoutParams(
+                0, LinearLayout.LayoutParams.MATCH_PARENT);
+            fp.weight = 1f;
+            fp.setMargins(dp(5), dp(5), dp(5), dp(5));
+            frame.setLayoutParams(fp);
 
             ImageView iv = new ImageView(this);
             iv.setLayoutParams(new FrameLayout.LayoutParams(
@@ -484,7 +493,7 @@ public class BatalhaActivity extends Activity {
 
             frameCartas[i] = frame;
             imgCartas[i]   = iv;
-            glMemoria.addView(frame);
+            rowLayouts[i / COLS_MEM].addView(frame);
             AnimHelper.zoomEntrada(frame, i * 55);
         }
 
@@ -493,8 +502,8 @@ public class BatalhaActivity extends Activity {
 
         handler.postDelayed(new Runnable() {
             @Override public void run() {
-                if (glMemoria.getChildAt(0) != null)
-                    glMemoria.getChildAt(0).requestFocus();
+                if (frameCartas != null && frameCartas[0] != null)
+                    frameCartas[0].requestFocus();
             }
         }, 400);
     }
@@ -737,9 +746,9 @@ public class BatalhaActivity extends Activity {
             default:
                 return false;
         }
-        if (novo != focadoMem && glMemoria != null && glMemoria.getChildAt(novo) != null) {
+        if (novo != focadoMem && frameCartas != null && frameCartas[novo] != null) {
             focadoMem = novo;
-            glMemoria.getChildAt(focadoMem).requestFocus();
+            frameCartas[focadoMem].requestFocus();
         }
         return true;
     }
