@@ -72,8 +72,7 @@
             android:layout_height="14dp"
             android:max="100"
             android:progress="0"
-            android:progressTint="#FFD700"
-            android:progressBackgroundTint="#4A148C"
+            android:progressDrawable="@drawable/pb_xp"
             android:layout_marginBottom="4dp" />
 
         <!-- Texto do XP -->
