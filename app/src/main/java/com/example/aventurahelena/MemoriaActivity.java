@@ -28,9 +28,9 @@ public class MemoriaActivity extends Activity {
     private static final int STAT_FOC_GANHO = 3;
 
     private static final String[] EMOJIS = {
-        "\u2B50", "\uD83C\uDF08", "\uD83D\uDC31", "\uD83D\uDC36",
-        "\uD83D\uDC38", "\uD83E\uDD84", "\uD83C\uDF79", "\uD83C\uDF80",
-        "\uD83C\uDF55", "\uD83C\uDF6D", "\uD83C\uDFF5", "\uD83C\uDFC6"
+        "SOL", "LUA", "GATO", "CAO",
+        "SAPO", "REI", "PEIXE", "FLOR",
+        "BOLO", "BOLA", "RATO", "COPA"
     };
 
     private static final int COR_CARTA_FECHADA = 0xFF4A148C;
@@ -108,7 +108,7 @@ public class MemoriaActivity extends Activity {
 
                 Button btn = new Button(this);
                 btn.setText("?");
-                btn.setTextSize(22);
+                btn.setTextSize(20);
                 btn.setTextColor(0xFFFFFFFF);
                 btn.setBackgroundResource(R.drawable.btn_selector);
                 btn.setFocusable(true);
@@ -201,7 +201,7 @@ public class MemoriaActivity extends Activity {
             @Override
             public void onHalf() {
                 carta.setText(emoji);
-                carta.setTextSize(26);
+                carta.setTextSize(14);
             }
         });
 
@@ -264,14 +264,14 @@ public class MemoriaActivity extends Activity {
                         @Override
                         public void onHalf() {
                             botoes[idx1].setText("?");
-                            botoes[idx1].setTextSize(22);
+                            botoes[idx1].setTextSize(20);
                         }
                     });
                     AnimHelper.flipCarta(botoes[idx2], new AnimHelper.OnHalfFlip() {
                         @Override
                         public void onHalf() {
                             botoes[idx2].setText("?");
-                            botoes[idx2].setTextSize(22);
+                            botoes[idx2].setTextSize(20);
                         }
                     });
                     bloqueado = false;
@@ -352,7 +352,7 @@ public class MemoriaActivity extends Activity {
 
         for (int i = 0; i < TOTAL_CARTAS; i++) {
             botoes[i].setText("?");
-            botoes[i].setTextSize(22);
+            botoes[i].setTextSize(20);
             botoes[i].setEnabled(true);
         }
 
