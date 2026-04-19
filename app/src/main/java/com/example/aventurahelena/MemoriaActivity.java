@@ -8,7 +8,7 @@ import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.GridLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -72,7 +72,7 @@ public class MemoriaActivity extends Activity {
         botoes[indiceFocado].requestFocus();
 
         // Animação de entrada: cartas aparecem com fade
-        GridLayout grid = (GridLayout) findViewById(R.id.grid_cartas);
+        LinearLayout grid = (LinearLayout) findViewById(R.id.grid_cartas);
         AnimHelper.fadeIn(grid, 400);
     }
 
@@ -92,46 +92,55 @@ public class MemoriaActivity extends Activity {
     }
 
     private void criarBotoes() {
-        GridLayout grid = (GridLayout) findViewById(R.id.grid_cartas);
+        LinearLayout grid = (LinearLayout) findViewById(R.id.grid_cartas);
         botoes = new Button[TOTAL_CARTAS];
 
-        for (int i = 0; i < TOTAL_CARTAS; i++) {
-            Button btn = new Button(this);
-            btn.setText("?");
-            btn.setTextSize(22);
-            btn.setTextColor(0xFFFFFFFF);
-            btn.setBackgroundResource(R.drawable.btn_selector);
-            btn.setFocusable(true);
-            btn.setFocusableInTouchMode(true);
+        for (int row = 0; row < LINHAS; row++) {
+            LinearLayout rowLayout = new LinearLayout(this);
+            rowLayout.setOrientation(LinearLayout.HORIZONTAL);
+            LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 0);
+            rowParams.weight = 1f;
+            rowLayout.setLayoutParams(rowParams);
 
-            final int indice = i;
-            btn.setTag(indice);
+            for (int col = 0; col < COLUNAS; col++) {
+                final int indice = row * COLUNAS + col;
 
-            GridLayout.LayoutParams params = new GridLayout.LayoutParams();
-            params.width  = 0;
-            params.height = 0;
-            params.columnSpec = GridLayout.spec(i % COLUNAS, 1f);
-            params.rowSpec    = GridLayout.spec(i / COLUNAS, 1f);
-            params.setMargins(6, 6, 6, 6);
-            btn.setLayoutParams(params);
+                Button btn = new Button(this);
+                btn.setText("?");
+                btn.setTextSize(22);
+                btn.setTextColor(0xFFFFFFFF);
+                btn.setBackgroundResource(R.drawable.btn_selector);
+                btn.setFocusable(true);
+                btn.setFocusableInTouchMode(true);
+                btn.setTag(indice);
 
-            btn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    indiceFocado = indice;
-                    processarClique(indice);
-                }
-            });
+                LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
+                    0, LinearLayout.LayoutParams.MATCH_PARENT);
+                btnParams.weight = 1f;
+                btnParams.setMargins(6, 6, 6, 6);
+                btn.setLayoutParams(btnParams);
 
-            btn.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                @Override
-                public void onFocusChange(View v, boolean hasFocus) {
-                    if (hasFocus) indiceFocado = indice;
-                }
-            });
+                btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        indiceFocado = indice;
+                        processarClique(indice);
+                    }
+                });
 
-            grid.addView(btn);
-            botoes[i] = btn;
+                btn.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                    @Override
+                    public void onFocusChange(View v, boolean hasFocus) {
+                        if (hasFocus) indiceFocado = indice;
+                    }
+                });
+
+                rowLayout.addView(btn);
+                botoes[indice] = btn;
+            }
+
+            grid.addView(rowLayout);
         }
     }
 
