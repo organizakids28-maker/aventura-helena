@@ -43,7 +43,9 @@ public class SoundManager {
     /** Par/resposta correto — dois beeps ascendentes */
     public void playAcerto() {
         play(ToneGenerator.TONE_CDMA_PIP, 100);
-        postDelayed(() -> play(ToneGenerator.TONE_CDMA_ANSWER, 180), 160);
+        postDelayed(new Runnable() {
+            @Override public void run() { play(ToneGenerator.TONE_CDMA_ANSWER, 180); }
+        }, 160);
     }
 
     /** Erro — som descendente */
@@ -54,9 +56,15 @@ public class SoundManager {
     /** Subiu de nível — três beeps ascendentes */
     public void playNivelUp() {
         play(ToneGenerator.TONE_CDMA_PIP, 100);
-        postDelayed(() -> play(ToneGenerator.TONE_CDMA_PIP, 100), 140);
-        postDelayed(() -> play(ToneGenerator.TONE_CDMA_ANSWER, 250), 280);
-        postDelayed(() -> play(ToneGenerator.TONE_CDMA_ANSWER, 300), 560);
+        postDelayed(new Runnable() {
+            @Override public void run() { play(ToneGenerator.TONE_CDMA_PIP, 100); }
+        }, 140);
+        postDelayed(new Runnable() {
+            @Override public void run() { play(ToneGenerator.TONE_CDMA_ANSWER, 250); }
+        }, 280);
+        postDelayed(new Runnable() {
+            @Override public void run() { play(ToneGenerator.TONE_CDMA_ANSWER, 300); }
+        }, 560);
     }
 
     /** XP ganho — beep suave */
@@ -67,7 +75,9 @@ public class SoundManager {
     /** Batalha iniciando — som de alerta */
     public void playBatalhaInicio() {
         play(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 400);
-        postDelayed(() -> play(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 300), 500);
+        postDelayed(new Runnable() {
+            @Override public void run() { play(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 300); }
+        }, 500);
     }
 
     /**
@@ -85,16 +95,26 @@ public class SoundManager {
     /** Vitória — sequência alegre */
     public void playVitoria() {
         play(ToneGenerator.TONE_CDMA_PIP, 90);
-        postDelayed(() -> play(ToneGenerator.TONE_CDMA_PIP, 90), 120);
-        postDelayed(() -> play(ToneGenerator.TONE_CDMA_ANSWER, 90), 240);
-        postDelayed(() -> play(ToneGenerator.TONE_CDMA_ANSWER, 90), 360);
-        postDelayed(() -> play(ToneGenerator.TONE_CDMA_ANSWER, 200), 500);
+        postDelayed(new Runnable() {
+            @Override public void run() { play(ToneGenerator.TONE_CDMA_PIP, 90); }
+        }, 120);
+        postDelayed(new Runnable() {
+            @Override public void run() { play(ToneGenerator.TONE_CDMA_ANSWER, 90); }
+        }, 240);
+        postDelayed(new Runnable() {
+            @Override public void run() { play(ToneGenerator.TONE_CDMA_ANSWER, 90); }
+        }, 360);
+        postDelayed(new Runnable() {
+            @Override public void run() { play(ToneGenerator.TONE_CDMA_ANSWER, 200); }
+        }, 500);
     }
 
     /** Derrota — dois tons descendentes */
     public void playDerrota() {
         play(ToneGenerator.TONE_CDMA_ABBR_INTERCEPT, 220);
-        postDelayed(() -> play(ToneGenerator.TONE_CDMA_ABBR_INTERCEPT, 400), 320);
+        postDelayed(new Runnable() {
+            @Override public void run() { play(ToneGenerator.TONE_CDMA_ABBR_INTERCEPT, 400); }
+        }, 320);
     }
 
     // ─── helpers internos ───
