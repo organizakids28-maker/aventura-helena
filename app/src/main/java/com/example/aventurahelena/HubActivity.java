@@ -60,6 +60,8 @@ public class HubActivity extends Activity {
 
         perfil = new PerfilHelena(this);
 
+        new UpdateChecker(this).execute();
+
         // Referências às views do perfil
         tvNivel   = (TextView)    findViewById(R.id.tv_nivel);
         tvXP      = (TextView)    findViewById(R.id.tv_xp);
