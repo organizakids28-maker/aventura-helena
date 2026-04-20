@@ -455,6 +455,16 @@
 
         </LinearLayout>
 
+        <!-- ─── Versão do app ─── -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/app_versao"
+            android:textColor="#33FFFFFF"
+            android:textSize="11sp"
+            android:gravity="right"
+            android:layout_marginTop="2dp" />
+
     </LinearLayout>
 
 </LinearLayout>
