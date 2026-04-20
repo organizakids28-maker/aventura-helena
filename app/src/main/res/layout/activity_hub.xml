@@ -225,7 +225,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="[ ]"
+                    android:text="\u25C6\u25C6"
                     android:textColor="#FFFFFF"
                     android:textSize="52sp"
                     android:textStyle="bold"
@@ -279,9 +279,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="A B C"
+                    android:text="\u270E"
                     android:textColor="#FFFFFF"
-                    android:textSize="36sp"
+                    android:textSize="56sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="10dp" />
 
@@ -332,9 +332,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="* OK"
+                    android:text="\u2714"
                     android:textColor="#FFFFFF"
-                    android:textSize="40sp"
+                    android:textSize="56sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="10dp" />
 
