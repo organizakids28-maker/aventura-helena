@@ -1,66 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-  <manifest
-      xmlns:android="http://schemas.android.com/apk/res/android"
-      package="com.example.aventurahelena"
-      android:versionCode="2"
-      android:versionName="1.71">
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.aventurahelena"
+    android:versionCode="2"
+    android:versionName="1.71">
 
-      <uses-sdk
-          android:minSdkVersion="17"
-          android:targetSdkVersion="30" />
+    <uses-sdk
+        android:minSdkVersion="17"
+        android:targetSdkVersion="30" />
 
-      <uses-feature
-          android:name="android.software.leanback"
-          android:required="true" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
-      <uses-feature
-          android:name="android.hardware.touchscreen"
-          android:required="false" />
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="true" />
 
-      <application
-          android:label="@string/app_name"
-          android:icon="@drawable/banner_tv"
-          android:banner="@drawable/banner_tv"
-          android:allowBackup="true"
-          android:theme="@style/AppTheme">
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
 
-          <activity
-              android:name=".HubActivity"
-              android:label="@string/app_name"
-              android:screenOrientation="landscape">
-              <intent-filter>
-                  <action android:name="android.intent.action.MAIN" />
-                  <category android:name="android.intent.category.LAUNCHER" />
-                  <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
-              </intent-filter>
-          </activity>
+    <application
+        android:label="@string/app_name"
+        android:icon="@drawable/banner_tv"
+        android:banner="@drawable/banner_tv"
+        android:allowBackup="true"
+        android:theme="@style/AppTheme">
 
-          <activity
-              android:name=".MemoriaActivity"
-              android:label="Jogo da Memória"
-              android:screenOrientation="landscape" />
+        <activity
+            android:name=".HubActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity>
 
-          <activity
-              android:name=".PalavraActivity"
-              android:label="Complete a Palavra"
-              android:screenOrientation="landscape" />
+        <activity
+            android:name=".MemoriaActivity"
+            android:label="Jogo da Memória"
+            android:screenOrientation="landscape" />
 
-          <activity
-              android:name=".TarefasActivity"
-              android:label="Tarefas de Casa"
-              android:screenOrientation="landscape" />
+        <activity
+            android:name=".PalavraActivity"
+            android:label="Complete a Palavra"
+            android:screenOrientation="landscape" />
 
-          <activity
-              android:name=".BatalhaActivity"
-              android:label="Batalha Final"
-              android:screenOrientation="landscape" />
+        <activity
+            android:name=".TarefasActivity"
+            android:label="Tarefas de Casa"
+            android:screenOrientation="landscape" />
 
-          <activity
-              android:name=".AdminActivity"
-              android:label="Administrador"
-              android:screenOrientation="landscape" />
+        <activity
+            android:name=".BatalhaActivity"
+            android:label="Batalha Final"
+            android:screenOrientation="landscape" />
 
-      </application>
+        <activity
+            android:name=".AdminActivity"
+            android:label="Administrador"
+            android:screenOrientation="landscape" />
 
-  </manifest>
-  
+    </application>
+
+</manifest>
