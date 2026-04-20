@@ -203,7 +203,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1.6"
+            android:layout_weight="1.1"
             android:orientation="horizontal"
             android:layout_marginBottom="10dp">
 
@@ -219,7 +219,7 @@
                 android:clickable="true"
                 android:descendantFocusability="blocksDescendants"
                 android:background="@drawable/card_memoria"
-                android:padding="16dp"
+                android:padding="10dp"
                 android:layout_marginRight="10dp">
 
                 <TextView
@@ -227,28 +227,28 @@
                     android:layout_height="wrap_content"
                     android:text="\u25C6\u25C6"
                     android:textColor="#FFFFFF"
-                    android:textSize="52sp"
+                    android:textSize="38sp"
                     android:textStyle="bold"
-                    android:layout_marginBottom="10dp" />
+                    android:layout_marginBottom="6dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Jogo da Memoria"
                     android:textColor="#FFFFFF"
-                    android:textSize="20sp"
+                    android:textSize="17sp"
                     android:textStyle="bold"
                     android:gravity="center"
-                    android:layout_marginBottom="6dp" />
+                    android:layout_marginBottom="4dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Encontre os pares"
                     android:textColor="#BBDEFB"
-                    android:textSize="13sp"
+                    android:textSize="12sp"
                     android:gravity="center"
-                    android:layout_marginBottom="8dp" />
+                    android:layout_marginBottom="6dp" />
 
                 <TextView
                     android:id="@+id/tv_sub_memoria"
@@ -256,7 +256,7 @@
                     android:layout_height="wrap_content"
                     android:text="+60 XP"
                     android:textColor="#FFD700"
-                    android:textSize="16sp"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
 
             </LinearLayout>
@@ -273,7 +273,7 @@
                 android:clickable="true"
                 android:descendantFocusability="blocksDescendants"
                 android:background="@drawable/card_palavras"
-                android:padding="16dp"
+                android:padding="10dp"
                 android:layout_marginRight="10dp">
 
                 <TextView
@@ -281,28 +281,28 @@
                     android:layout_height="wrap_content"
                     android:text="\u270E"
                     android:textColor="#FFFFFF"
-                    android:textSize="56sp"
+                    android:textSize="42sp"
                     android:textStyle="bold"
-                    android:layout_marginBottom="10dp" />
+                    android:layout_marginBottom="6dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Complete a Palavra"
                     android:textColor="#FFFFFF"
-                    android:textSize="20sp"
+                    android:textSize="17sp"
                     android:textStyle="bold"
                     android:gravity="center"
-                    android:layout_marginBottom="6dp" />
+                    android:layout_marginBottom="4dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Monte as palavras"
                     android:textColor="#E1BEE7"
-                    android:textSize="13sp"
+                    android:textSize="12sp"
                     android:gravity="center"
-                    android:layout_marginBottom="8dp" />
+                    android:layout_marginBottom="6dp" />
 
                 <TextView
                     android:id="@+id/tv_sub_palavras"
@@ -310,7 +310,7 @@
                     android:layout_height="wrap_content"
                     android:text="+50 XP"
                     android:textColor="#FFD700"
-                    android:textSize="16sp"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
 
             </LinearLayout>
@@ -327,35 +327,35 @@
                 android:clickable="true"
                 android:descendantFocusability="blocksDescendants"
                 android:background="@drawable/card_tarefas"
-                android:padding="16dp">
+                android:padding="10dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="\u2714"
                     android:textColor="#FFFFFF"
-                    android:textSize="56sp"
+                    android:textSize="42sp"
                     android:textStyle="bold"
-                    android:layout_marginBottom="10dp" />
+                    android:layout_marginBottom="6dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Tarefas de Casa"
                     android:textColor="#FFFFFF"
-                    android:textSize="20sp"
+                    android:textSize="17sp"
                     android:textStyle="bold"
                     android:gravity="center"
-                    android:layout_marginBottom="6dp" />
+                    android:layout_marginBottom="4dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Cumpra suas tarefas"
                     android:textColor="#FFE0B2"
-                    android:textSize="13sp"
+                    android:textSize="12sp"
                     android:gravity="center"
-                    android:layout_marginBottom="8dp" />
+                    android:layout_marginBottom="6dp" />
 
                 <TextView
                     android:id="@+id/tv_sub_tarefas"
@@ -363,7 +363,7 @@
                     android:layout_height="wrap_content"
                     android:text="10 pendentes"
                     android:textColor="#FFD700"
-                    android:textSize="16sp"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
 
             </LinearLayout>
@@ -376,7 +376,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/checklist_bg"
-            android:padding="12dp"
+            android:padding="14dp"
             android:layout_marginBottom="10dp">
 
             <TextView
@@ -385,9 +385,10 @@
                 android:layout_height="wrap_content"
                 android:text="Complete tudo para desbloquear a Batalha:"
                 android:textColor="#CE93D8"
-                android:textSize="13sp"
+                android:textSize="16sp"
+                android:textStyle="bold"
                 android:gravity="center"
-                android:layout_marginBottom="4dp" />
+                android:layout_marginBottom="6dp" />
 
             <TextView
                 android:id="@+id/tv_checklist"
@@ -395,7 +396,7 @@
                 android:layout_height="wrap_content"
                 android:text=""
                 android:textColor="#E1BEE7"
-                android:textSize="13sp"
+                android:textSize="15sp"
                 android:gravity="center" />
 
         </LinearLayout>
@@ -419,8 +420,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="\u2694"
-                android:textSize="36sp"
-                android:layout_marginRight="12dp" />
+                android:textSize="46sp"
+                android:layout_marginRight="14dp" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -433,7 +434,7 @@
                     android:layout_height="wrap_content"
                     android:text="BATALHAR!"
                     android:textColor="#FFD700"
-                    android:textSize="28sp"
+                    android:textSize="36sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -441,7 +442,7 @@
                     android:layout_height="wrap_content"
                     android:text="Enfrente o Bruxo das Tarefas!"
                     android:textColor="#FFCDD2"
-                    android:textSize="14sp" />
+                    android:textSize="18sp" />
 
             </LinearLayout>
 
@@ -449,8 +450,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="\u2694"
-                android:textSize="36sp"
-                android:layout_marginLeft="12dp" />
+                android:textSize="46sp"
+                android:layout_marginLeft="14dp" />
 
         </LinearLayout>
 
