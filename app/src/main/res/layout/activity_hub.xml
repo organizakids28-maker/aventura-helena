@@ -13,10 +13,10 @@
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1.1"
+        android:layout_weight="1.2"
         android:orientation="vertical"
         android:background="@drawable/profile_bg"
-        android:padding="20dp"
+        android:padding="12dp"
         android:layout_marginRight="14dp"
         android:gravity="center_horizontal">
 
@@ -24,20 +24,21 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="\u2728 AVENTURA DA HELENA \u2728"
+            android:text="AVENTURA DA HELENA"
             android:textColor="#FFD700"
-            android:textSize="16sp"
+            android:textSize="15sp"
             android:textStyle="bold"
             android:gravity="center"
-            android:layout_marginBottom="10dp" />
+            android:layout_marginBottom="6dp" />
 
-        <!-- Avatar da Helena (foto normal, sem recorte) -->
+        <!-- Avatar da Helena — ocupa a maior parte do painel -->
         <ImageView
             android:id="@+id/iv_avatar"
-            android:layout_width="160dp"
-            android:layout_height="160dp"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:src="@drawable/helena_avatar"
-            android:scaleType="fitCenter"
+            android:scaleType="centerCrop"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="8dp" />
 
@@ -47,7 +48,7 @@
             android:layout_height="wrap_content"
             android:text="Helena"
             android:textColor="#FFFFFF"
-            android:textSize="28sp"
+            android:textSize="24sp"
             android:textStyle="bold"
             android:gravity="center"
             android:layout_marginBottom="2dp" />
@@ -57,12 +58,12 @@
             android:id="@+id/tv_nivel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Nivel 1 \u2022 Exploradora"
+            android:text="Nivel 1 - Exploradora"
             android:textColor="#CE93D8"
-            android:textSize="15sp"
+            android:textSize="13sp"
             android:textStyle="bold"
             android:gravity="center"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginBottom="8dp" />
 
         <!-- Barra de XP -->
         <ProgressBar
@@ -218,25 +219,36 @@
                 android:clickable="true"
                 android:descendantFocusability="blocksDescendants"
                 android:background="@drawable/card_memoria"
-                android:padding="12dp"
+                android:padding="16dp"
                 android:layout_marginRight="10dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="\uD83C\uDCCF"
-                    android:textSize="40sp"
-                    android:layout_marginBottom="6dp" />
+                    android:text="[ ]"
+                    android:textColor="#FFFFFF"
+                    android:textSize="52sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="10dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Jogo da Memoria"
                     android:textColor="#FFFFFF"
-                    android:textSize="18sp"
+                    android:textSize="20sp"
                     android:textStyle="bold"
                     android:gravity="center"
-                    android:layout_marginBottom="4dp" />
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Encontre os pares"
+                    android:textColor="#BBDEFB"
+                    android:textSize="13sp"
+                    android:gravity="center"
+                    android:layout_marginBottom="8dp" />
 
                 <TextView
                     android:id="@+id/tv_sub_memoria"
@@ -244,7 +256,7 @@
                     android:layout_height="wrap_content"
                     android:text="+60 XP"
                     android:textColor="#FFD700"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
             </LinearLayout>
@@ -261,25 +273,36 @@
                 android:clickable="true"
                 android:descendantFocusability="blocksDescendants"
                 android:background="@drawable/card_palavras"
-                android:padding="12dp"
+                android:padding="16dp"
                 android:layout_marginRight="10dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="\u270F"
-                    android:textSize="40sp"
-                    android:layout_marginBottom="6dp" />
+                    android:text="A B C"
+                    android:textColor="#FFFFFF"
+                    android:textSize="36sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="10dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Complete a Palavra"
                     android:textColor="#FFFFFF"
-                    android:textSize="18sp"
+                    android:textSize="20sp"
                     android:textStyle="bold"
                     android:gravity="center"
-                    android:layout_marginBottom="4dp" />
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Monte as palavras"
+                    android:textColor="#E1BEE7"
+                    android:textSize="13sp"
+                    android:gravity="center"
+                    android:layout_marginBottom="8dp" />
 
                 <TextView
                     android:id="@+id/tv_sub_palavras"
@@ -287,7 +310,7 @@
                     android:layout_height="wrap_content"
                     android:text="+50 XP"
                     android:textColor="#FFD700"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
             </LinearLayout>
@@ -304,24 +327,35 @@
                 android:clickable="true"
                 android:descendantFocusability="blocksDescendants"
                 android:background="@drawable/card_tarefas"
-                android:padding="12dp">
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="\uD83C\uDFE0"
+                    android:text="* OK"
+                    android:textColor="#FFFFFF"
                     android:textSize="40sp"
-                    android:layout_marginBottom="6dp" />
+                    android:textStyle="bold"
+                    android:layout_marginBottom="10dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Tarefas de Casa"
                     android:textColor="#FFFFFF"
-                    android:textSize="18sp"
+                    android:textSize="20sp"
                     android:textStyle="bold"
                     android:gravity="center"
-                    android:layout_marginBottom="4dp" />
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cumpra suas tarefas"
+                    android:textColor="#FFE0B2"
+                    android:textSize="13sp"
+                    android:gravity="center"
+                    android:layout_marginBottom="8dp" />
 
                 <TextView
                     android:id="@+id/tv_sub_tarefas"
@@ -329,7 +363,7 @@
                     android:layout_height="wrap_content"
                     android:text="10 pendentes"
                     android:textColor="#FFD700"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
             </LinearLayout>
