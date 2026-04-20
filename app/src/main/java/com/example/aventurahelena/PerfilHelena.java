@@ -264,4 +264,30 @@ public class PerfilHelena {
             && todasTarefasConcluidas(totalTarefas)
             && batalhaDisponivel();
     }
-}
+
+      // ─────────────────────────────────────────
+      // RESET (ADMIN)
+      // ─────────────────────────────────────────
+
+      public void resetarDiaAtual() {
+          prefs.edit()
+              .putBoolean(KEY_MINI_MEMORIA,   false)
+              .putBoolean(KEY_MINI_PALAVRAS,  false)
+              .putString(KEY_TAREFAS_FEITAS,  "")
+              .putString(KEY_BATALHA_STATUS,  "")
+              .apply();
+      }
+
+      public void resetarTudo() {
+          prefs.edit()
+              .putInt(KEY_XP,                 0)
+              .putInt(KEY_STAT_INT,           0)
+              .putInt(KEY_STAT_FOC,           0)
+              .putInt(KEY_STAT_RES,           0)
+              .putBoolean(KEY_MINI_MEMORIA,   false)
+              .putBoolean(KEY_MINI_PALAVRAS,  false)
+              .putString(KEY_TAREFAS_FEITAS,  "")
+              .putString(KEY_BATALHA_STATUS,  "")
+              .apply();
+      }
+  }

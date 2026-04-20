@@ -158,18 +158,18 @@ public class MemoriaActivity extends Activity {
                 tvTitulo.setText("Memoria - Facil (4x4)");
                 break;
             case MODO_8X8:
-                colunas = 8; linhas = 8;
-                totalPares = 32; totalCartas = 64;
-                tamTextoQ = 12;  tamTextoPal = 9;
-                margemCard = 3;
-                tvTitulo.setText("Memoria - Dificil (8x8)");
-                break;
-            default:
                 colunas = 6; linhas = 6;
                 totalPares = 18; totalCartas = 36;
-                tamTextoQ = 16;  tamTextoPal = 11;
+                tamTextoQ = 15;  tamTextoPal = 10;
                 margemCard = 5;
-                tvTitulo.setText("Memoria - Medio (6x6)");
+                tvTitulo.setText("Memoria - Dificil (6x6)");
+                break;
+            default:
+                colunas = 6; linhas = 4;
+                totalPares = 12; totalCartas = 24;
+                tamTextoQ = 17;  tamTextoPal = 12;
+                margemCard = 6;
+                tvTitulo.setText("Memoria - Medio (4x6)");
                 break;
         }
 

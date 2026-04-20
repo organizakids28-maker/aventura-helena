@@ -18,16 +18,18 @@ import android.widget.TextView;
  *
  * Navegação D-pad:
  * - Esquerda/Direita: navega entre os 3 cards de jogos (linha de cima)
- * - Baixo: vai para o card da Batalha (quando disponível)
+ * - Baixo: vai para o card da Batalha (quando disponível), depois versão/admin
  * - Cima: volta para os cards de jogos
  * - OK/Enter: entra no jogo selecionado
+ *
+ * Acesso admin: navegue até o número de versão (canto inferior dir.) e pressione OK
  */
 public class HubActivity extends Activity {
 
     private static final int TOTAL_TAREFAS = 10;
 
     private PerfilHelena perfil;
-    private int xpPctAnterior = 0; // para animar o progresso da barra
+    private int xpPctAnterior = 0;
 
     // Views do perfil
     private TextView tvNivel;
@@ -36,6 +38,7 @@ public class HubActivity extends Activity {
     private TextView tvInt;
     private TextView tvFoc;
     private TextView tvRes;
+    private TextView tvVersao;
 
     // Views dos cards
     private TextView tvSubTarefas;
@@ -46,7 +49,9 @@ public class HubActivity extends Activity {
     // Cards navegáveis: 0=Memória, 1=Palavras, 2=Tarefas, 3=Batalha
     private View[] cards;
     private int indiceFocado = 0;
-    private boolean linhaInferior = false; // true = foco na batalha
+
+    // Controle de linha de foco: 0=cards superiores, 1=batalha, 2=versao/admin
+    private int linhaAtual = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +60,6 @@ public class HubActivity extends Activity {
 
         perfil = new PerfilHelena(this);
 
-        // Avatar carregado direto pelo XML (sem recorte)
-
         // Referências às views do perfil
         tvNivel   = (TextView)    findViewById(R.id.tv_nivel);
         tvXP      = (TextView)    findViewById(R.id.tv_xp);
@@ -64,6 +67,7 @@ public class HubActivity extends Activity {
         tvInt     = (TextView)    findViewById(R.id.tv_int);
         tvFoc     = (TextView)    findViewById(R.id.tv_foc);
         tvRes     = (TextView)    findViewById(R.id.tv_res);
+        tvVersao  = (TextView)    findViewById(R.id.tv_versao);
 
         // Referências dos cards e textos dinâmicos
         tvSubTarefas       = (TextView)      findViewById(R.id.tv_sub_tarefas);
@@ -75,10 +79,9 @@ public class HubActivity extends Activity {
         LinearLayout cardPalavras = (LinearLayout) findViewById(R.id.card_palavras);
         LinearLayout cardTarefas  = (LinearLayout) findViewById(R.id.card_tarefas);
 
-        // Array de cards (linha superior)
         cards = new View[]{cardMemoria, cardPalavras, cardTarefas};
 
-        // ─── Configura cliques dos cards ───
+        // ─── Cliques dos cards ───
         cardMemoria.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -107,6 +110,14 @@ public class HubActivity extends Activity {
             }
         });
 
+        // Versão/admin — click abre a tela de administrador
+        tvVersao.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(HubActivity.this, AdminActivity.class));
+            }
+        });
+
         // Rastreia qual card está em foco
         for (int i = 0; i < cards.length; i++) {
             final int idx = i;
@@ -115,7 +126,7 @@ public class HubActivity extends Activity {
                 public void onFocusChange(View v, boolean hasFocus) {
                     if (hasFocus) {
                         indiceFocado = idx;
-                        linhaInferior = false;
+                        linhaAtual = 0;
                     }
                 }
             });
@@ -124,22 +135,25 @@ public class HubActivity extends Activity {
         cardBatalha.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) linhaInferior = true;
+                if (hasFocus) linhaAtual = 1;
             }
         });
 
-        // Animação de entrada dos cards (escalonada)
+        tvVersao.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) linhaAtual = 2;
+            }
+        });
+
+        // Animação de entrada dos cards
         AnimHelper.zoomEntrada(cardMemoria,  0);
         AnimHelper.zoomEntrada(cardPalavras, 80);
         AnimHelper.zoomEntrada(cardTarefas,  160);
 
-        // Foco inicial no card da Memória
         cardMemoria.requestFocus();
     }
 
-    /**
-     * Atualiza toda a UI sempre que voltamos ao hub (após terminar um mini-jogo).
-     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -147,29 +161,22 @@ public class HubActivity extends Activity {
         atualizarUI();
     }
 
-    /**
-     * Atualiza todas as informações do perfil e estado dos cards.
-     */
     private void atualizarUI() {
         int nivel     = perfil.getNivel();
         String titulo = perfil.getTitulo();
         int xp        = perfil.getXP();
         int xpPct     = perfil.getXPPorcentagem();
 
-        // Perfil
         tvNivel.setText("Nivel " + nivel + " \u2022 " + titulo);
         tvXP.setText(xp + " XP \u2192 Nivel " + (nivel + 1));
 
-        // Anima a barra de XP do valor anterior para o novo
         AnimHelper.animarXP(pbXP, xpPctAnterior, xpPct);
         xpPctAnterior = xpPct;
 
-        // Stats
         tvInt.setText(String.valueOf(perfil.getStatInteligencia()));
         tvFoc.setText(String.valueOf(perfil.getStatFoco()));
         tvRes.setText(String.valueOf(perfil.getStatResponsabilidade()));
 
-        // Subtítulo do card de tarefas (mostra quantas feitas)
         int tarefasFeitas = perfil.getQuantidadeTarefasFeitas();
         if (tarefasFeitas >= TOTAL_TAREFAS) {
             tvSubTarefas.setText("Tudo feito! \u2705");
@@ -177,7 +184,6 @@ public class HubActivity extends Activity {
             tvSubTarefas.setText(tarefasFeitas + "/" + TOTAL_TAREFAS + " feitas");
         }
 
-        // Estado da batalha
         String statusBatalha = perfil.getBatalhaStatus();
         boolean memoria      = perfil.isMemoriaConcluida();
         boolean palavras     = perfil.isPalavrasConcluida();
@@ -200,7 +206,6 @@ public class HubActivity extends Activity {
 
         tvChecklist.setText(checklist.toString().trim());
 
-        // Mostra ou esconde o card da batalha
         boolean desbloqueada = perfil.batalhaDesbloqueada(TOTAL_TAREFAS);
         cardBatalha.setVisibility(desbloqueada ? View.VISIBLE : View.GONE);
     }
@@ -208,9 +213,10 @@ public class HubActivity extends Activity {
     /**
      * Navegação D-pad pelos cards.
      *
-     * Layout:
-     * [Memória] [Palavras] [Tarefas]   ← linha superior (left/right)
-     *       [⚔️ BATALHAR!]             ← linha inferior (down/up)
+     * Linhas:
+     *   0: [Memória] [Palavras] [Tarefas]   ← esquerda/direita
+     *   1: [⚔️ BATALHAR!]                   ← disponível quando desbloqueada
+     *   2: [versão — acesso admin]           ← DOWN a partir da linha 1 (ou 0 se sem batalha)
      */
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -219,41 +225,56 @@ public class HubActivity extends Activity {
         switch (keyCode) {
 
             case KeyEvent.KEYCODE_DPAD_RIGHT:
-                if (!linhaInferior && indiceFocado < 2) {
+                if (linhaAtual == 0 && indiceFocado < 2) {
                     indiceFocado++;
                     cards[indiceFocado].requestFocus();
                 }
                 return true;
 
             case KeyEvent.KEYCODE_DPAD_LEFT:
-                if (!linhaInferior && indiceFocado > 0) {
+                if (linhaAtual == 0 && indiceFocado > 0) {
                     indiceFocado--;
                     cards[indiceFocado].requestFocus();
-                } else if (linhaInferior) {
-                    // De baixo, vai pro card do meio
-                    linhaInferior = false;
+                } else if (linhaAtual == 1) {
+                    linhaAtual = 0;
                     indiceFocado = 1;
                     cards[indiceFocado].requestFocus();
                 }
                 return true;
 
             case KeyEvent.KEYCODE_DPAD_DOWN:
-                if (!linhaInferior && batalhaVisivel) {
-                    linhaInferior = true;
+                if (linhaAtual == 0 && batalhaVisivel) {
+                    linhaAtual = 1;
                     cardBatalha.requestFocus();
+                } else if (linhaAtual == 0 && !batalhaVisivel) {
+                    linhaAtual = 2;
+                    tvVersao.requestFocus();
+                } else if (linhaAtual == 1) {
+                    linhaAtual = 2;
+                    tvVersao.requestFocus();
                 }
                 return true;
 
             case KeyEvent.KEYCODE_DPAD_UP:
-                if (linhaInferior) {
-                    linhaInferior = false;
+                if (linhaAtual == 2) {
+                    if (batalhaVisivel) {
+                        linhaAtual = 1;
+                        cardBatalha.requestFocus();
+                    } else {
+                        linhaAtual = 0;
+                        cards[indiceFocado].requestFocus();
+                    }
+                } else if (linhaAtual == 1) {
+                    linhaAtual = 0;
                     cards[indiceFocado].requestFocus();
                 }
                 return true;
 
             case KeyEvent.KEYCODE_DPAD_CENTER:
             case KeyEvent.KEYCODE_ENTER:
-                if (linhaInferior) {
+                if (linhaAtual == 2) {
+                    tvVersao.performClick();
+                } else if (linhaAtual == 1) {
                     cardBatalha.performClick();
                 } else {
                     cards[indiceFocado].performClick();
@@ -263,5 +284,4 @@ public class HubActivity extends Activity {
 
         return super.onKeyDown(keyCode, event);
     }
-
 }

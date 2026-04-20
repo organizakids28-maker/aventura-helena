@@ -38,7 +38,7 @@
             android:layout_height="0dp"
             android:layout_weight="1"
             android:src="@drawable/helena_avatar"
-            android:scaleType="centerCrop"
+            android:scaleType="fitCenter"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="8dp" />
 
@@ -460,10 +460,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/app_versao"
-            android:textColor="#33FFFFFF"
-            android:textSize="11sp"
+            android:textColor="#44FFFFFF"
+            android:textSize="12sp"
             android:gravity="right"
-            android:layout_marginTop="2dp" />
+            android:layout_marginTop="2dp" 
+            android:id="@+id/tv_versao"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:clickable="true" />
 
     </LinearLayout>
 
