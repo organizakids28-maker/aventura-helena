@@ -42,46 +42,49 @@
             android:orientation="horizontal"
             android:gravity="center">
 
+            <!-- FÁCIL -->
             <Button
                 android:id="@+id/btn_4x4"
                 android:layout_width="0dp"
-                android:layout_height="120dp"
+                android:layout_height="160dp"
                 android:layout_weight="1"
-                android:text="4 x 4\nFacil\n8 pares"
+                android:text="4 x 4\n\nFACIL\n8 pares"
                 android:textColor="#FFFFFF"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:background="@drawable/btn_action"
+                android:background="@drawable/btn_facil"
                 android:layout_marginRight="16dp" />
 
+            <!-- MÉDIO -->
             <Button
                 android:id="@+id/btn_6x6"
                 android:layout_width="0dp"
-                android:layout_height="120dp"
+                android:layout_height="160dp"
                 android:layout_weight="1"
-                android:text="6 x 6\nMedio\n18 pares"
+                android:text="6 x 6\n\nMEDIO\n18 pares"
                 android:textColor="#FFFFFF"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:background="@drawable/btn_action"
+                android:background="@drawable/btn_medio"
                 android:layout_marginRight="16dp" />
 
+            <!-- DIFÍCIL -->
             <Button
                 android:id="@+id/btn_8x8"
                 android:layout_width="0dp"
-                android:layout_height="120dp"
+                android:layout_height="160dp"
                 android:layout_weight="1"
-                android:text="8 x 8\nDificil\n32 pares"
+                android:text="8 x 8\n\nDIFICIL\n32 pares"
                 android:textColor="#FFFFFF"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
-                android:background="@drawable/btn_action" />
+                android:background="@drawable/btn_dificil" />
 
         </LinearLayout>
 
