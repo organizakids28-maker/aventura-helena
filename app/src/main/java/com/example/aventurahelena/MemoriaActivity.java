@@ -391,12 +391,12 @@ public class MemoriaActivity extends Activity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (naSelecao) {
-            return navegarSelecao(keyCode);
+            return navegarSelecao(keyCode, event);
         }
-        return navegarJogo(keyCode);
+        return navegarJogo(keyCode, event);
     }
 
-    private boolean navegarSelecao(int keyCode) {
+    private boolean navegarSelecao(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 if (selecaoFocada < 2) {
@@ -422,7 +422,7 @@ public class MemoriaActivity extends Activity {
         }
     }
 
-    private boolean navegarJogo(int keyCode) {
+    private boolean navegarJogo(int keyCode, KeyEvent event) {
         int novoIndice = indiceFocado;
 
         switch (keyCode) {
