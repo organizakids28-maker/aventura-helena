@@ -75,9 +75,11 @@ public class BatalhaActivity extends Activity {
     private boolean batalhaTerminou = false;
 
     /* ─── Views HP ──────────────────────────────────────────── */
-    private TextView    tvHpHelena, tvHpBruxo;
-    private ProgressBar pbHpHelena, pbHpBruxo;
-    private TextView    tvFeedback, tvModo;
+    private TextView     tvHpHelena, tvHpBruxo;
+    private ProgressBar  pbHpHelena, pbHpBruxo;
+    private TextView     tvFeedback, tvModo;
+    private ImageView    ivHelenaBatalha;
+    private LinearLayout llBruxoPerfil;
 
     /* ─── Modo Palavra ──────────────────────────────────────── */
     private LinearLayout llModoPalavra;
@@ -139,7 +141,9 @@ public class BatalhaActivity extends Activity {
         llModoPalavra = (LinearLayout) findViewById(R.id.ll_modo_palavra);
         llLetras     = (LinearLayout) findViewById(R.id.ll_letras);
         tvDica       = (TextView)   findViewById(R.id.tv_dica_palavra);
-        glMemoria    = (LinearLayout) findViewById(R.id.gl_memoria_batalha);
+        glMemoria       = (LinearLayout) findViewById(R.id.gl_memoria_batalha);
+        ivHelenaBatalha = (ImageView)    findViewById(R.id.iv_helena_batalha);
+        llBruxoPerfil   = (LinearLayout) findViewById(R.id.ll_bruxo_perfil);
 
         botoesOpcao = new Button[]{
             (Button) findViewById(R.id.btn_op0),
@@ -613,12 +617,24 @@ public class BatalhaActivity extends Activity {
     // ═══════════════════════════════════════════════════════════
 
     private void atualizarHP() {
-        tvHpHelena.setText("HELENA  " + hpHelena + "/" + HP_HELENA_MAX);
-        tvHpBruxo.setText("BRUXO  "  + hpBruxo  + "/" + HP_BRUXO_MAX);
-        AnimHelper.animarXP(pbHpHelena, pbHpHelena.getProgress(), hpHelena);
-        AnimHelper.animarXP(pbHpBruxo,  pbHpBruxo.getProgress(),  hpBruxo);
+        int prevH = pbHpHelena.getProgress();
+        int prevB = pbHpBruxo.getProgress();
+
+        tvHpHelena.setText("HELENA " + hpHelena + "/" + HP_HELENA_MAX);
+        tvHpBruxo.setText("BRUXO " + hpBruxo + "/" + HP_BRUXO_MAX);
+        AnimHelper.animarXP(pbHpHelena, prevH, hpHelena);
+        AnimHelper.animarXP(pbHpBruxo,  prevB,  hpBruxo);
         tvHpHelena.setTextColor(hpHelena > 30 ? 0xFF4CAF50 : 0xFFEF5350);
         tvHpBruxo.setTextColor(hpBruxo   > 50 ? 0xFFCE93D8 : 0xFFEF5350);
+
+        if (hpHelena < prevH && ivHelenaBatalha != null) {
+            AnimHelper.shake(ivHelenaBatalha);
+            AnimHelper.flashRed(ivHelenaBatalha);
+        }
+        if (hpBruxo < prevB && llBruxoPerfil != null) {
+            AnimHelper.shake(llBruxoPerfil);
+            AnimHelper.flashRed(llBruxoPerfil);
+        }
     }
 
     private void mostrarFeedback(String msg, int cor) {
@@ -642,11 +658,14 @@ public class BatalhaActivity extends Activity {
                 @Override public void run() { sound.playNivelUp(); }
             }, 800);
             AnimHelper.celebracao(tvFeedback);
-            mostrarFeedback("\uD83C\uDFC6 VITORIA! Bruxo derrotado!", 0xFFFFD700);
+            if (ivHelenaBatalha != null) AnimHelper.celebracao(ivHelenaBatalha);
+            if (llBruxoPerfil  != null) AnimHelper.flashRed(llBruxoPerfil);
+            mostrarFeedback("VITORIA! Bruxo derrotado!", 0xFFFFD700);
         } else {
             perfil.setBatalhaStatus("perdeu");
             sound.playDerrota();
-            mostrarFeedback("\uD83D\uDCA4 Derrota... tente amanha!", 0xFFEF5350);
+            if (ivHelenaBatalha != null) AnimHelper.shake(ivHelenaBatalha);
+            mostrarFeedback("Derrota... tente amanha!", 0xFFEF5350);
         }
 
         final String titulo = helenaGanhou ? "VITORIA!" : "Que pena...";
