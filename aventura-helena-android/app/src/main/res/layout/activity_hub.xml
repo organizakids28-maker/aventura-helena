@@ -1,0 +1,474 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="#1A0033"
+    android:padding="16dp">
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- PAINEL ESQUERDO: Perfil da Helena               -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1.2"
+        android:orientation="vertical"
+        android:background="@drawable/profile_bg"
+        android:padding="12dp"
+        android:layout_marginRight="14dp"
+        android:gravity="center_horizontal">
+
+        <!-- Título do app -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="AVENTURA DA HELENA"
+            android:textColor="#FFD700"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="6dp" />
+
+        <!-- Avatar da Helena — ocupa a maior parte do painel -->
+        <ImageView
+            android:id="@+id/iv_avatar"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:src="@drawable/helena_avatar"
+            android:scaleType="fitCenter"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Nome da Helena -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Helena"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="2dp" />
+
+        <!-- Nível e título -->
+        <TextView
+            android:id="@+id/tv_nivel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nivel 1 - Exploradora"
+            android:textColor="#CE93D8"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Barra de XP -->
+        <ProgressBar
+            android:id="@+id/pb_xp"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="14dp"
+            android:max="100"
+            android:progress="0"
+            android:progressDrawable="@drawable/pb_xp"
+            android:layout_marginBottom="4dp" />
+
+        <!-- Texto do XP -->
+        <TextView
+            android:id="@+id/tv_xp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="0 XP \u2192 Nivel 2"
+            android:textColor="#AB47BC"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:layout_marginBottom="16dp" />
+
+        <!-- ─────── Stats ─────── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <!-- Inteligência -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="#3D006B"
+                android:padding="8dp"
+                android:layout_marginRight="6dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="\uD83E\uDDE0"
+                    android:textSize="22sp" />
+                <TextView
+                    android:id="@+id/tv_int"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="#FFD700"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Intel."
+                    android:textColor="#CE93D8"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
+            <!-- Foco -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="#3D006B"
+                android:padding="8dp"
+                android:layout_marginRight="6dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="\uD83C\uDFAF"
+                    android:textSize="22sp" />
+                <TextView
+                    android:id="@+id/tv_foc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="#FFD700"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Foco"
+                    android:textColor="#CE93D8"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
+            <!-- Responsabilidade -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="#3D006B"
+                android:padding="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="\uD83C\uDFE0"
+                    android:textSize="22sp" />
+                <TextView
+                    android:id="@+id/tv_res"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="#FFD700"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Resp."
+                    android:textColor="#CE93D8"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- PAINEL DIREITO: Cards de ação + batalha         -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="2"
+        android:orientation="vertical">
+
+        <!-- ─── 3 Cards de mini-jogos (lado a lado) ─── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.1"
+            android:orientation="horizontal"
+            android:layout_marginBottom="10dp">
+
+            <!-- Card: Jogo da Memória (AZUL) -->
+            <LinearLayout
+                android:id="@+id/card_memoria"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:focusable="true"
+                android:clickable="true"
+                android:descendantFocusability="blocksDescendants"
+                android:background="@drawable/card_memoria"
+                android:padding="10dp"
+                android:layout_marginRight="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="\u25C6\u25C6"
+                    android:textColor="#FFFFFF"
+                    android:textSize="38sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Jogo da Memoria"
+                    android:textColor="#FFFFFF"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Encontre os pares"
+                    android:textColor="#BBDEFB"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:id="@+id/tv_sub_memoria"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+60 XP"
+                    android:textColor="#FFD700"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <!-- Card: Complete a Palavra (ROXO) -->
+            <LinearLayout
+                android:id="@+id/card_palavras"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:focusable="true"
+                android:clickable="true"
+                android:descendantFocusability="blocksDescendants"
+                android:background="@drawable/card_palavras"
+                android:padding="10dp"
+                android:layout_marginRight="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="\u270E"
+                    android:textColor="#FFFFFF"
+                    android:textSize="42sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Complete a Palavra"
+                    android:textColor="#FFFFFF"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Monte as palavras"
+                    android:textColor="#E1BEE7"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:id="@+id/tv_sub_palavras"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="+50 XP"
+                    android:textColor="#FFD700"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <!-- Card: Tarefas de Casa (LARANJA) -->
+            <LinearLayout
+                android:id="@+id/card_tarefas"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:focusable="true"
+                android:clickable="true"
+                android:descendantFocusability="blocksDescendants"
+                android:background="@drawable/card_tarefas"
+                android:padding="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="\u2714"
+                    android:textColor="#FFFFFF"
+                    android:textSize="42sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tarefas de Casa"
+                    android:textColor="#FFFFFF"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cumpra suas tarefas"
+                    android:textColor="#FFE0B2"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:id="@+id/tv_sub_tarefas"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="10 pendentes"
+                    android:textColor="#FFD700"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- ─── Checklist de desbloqueio ─── -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/checklist_bg"
+            android:padding="14dp"
+            android:layout_marginBottom="10dp">
+
+            <TextView
+                android:id="@+id/tv_checklist_titulo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Complete tudo para desbloquear a Batalha:"
+                android:textColor="#CE93D8"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:id="@+id/tv_checklist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="#E1BEE7"
+                android:textSize="15sp"
+                android:gravity="center" />
+
+        </LinearLayout>
+
+        <!-- ─── Botão da Batalha (apenas quando desbloqueado) ─── -->
+        <LinearLayout
+            android:id="@+id/card_batalha"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:focusable="true"
+            android:clickable="true"
+            android:descendantFocusability="blocksDescendants"
+            android:background="@drawable/btn_battle"
+            android:padding="12dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="\u2694"
+                android:textSize="46sp"
+                android:layout_marginRight="14dp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="BATALHAR!"
+                    android:textColor="#FFD700"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Enfrente o Bruxo das Tarefas!"
+                    android:textColor="#FFCDD2"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="\u2694"
+                android:textSize="46sp"
+                android:layout_marginLeft="14dp" />
+
+        </LinearLayout>
+
+        <!-- ─── Versão do app (toque para abrir admin) ─── -->
+        <TextView
+            android:id="@+id/tv_versao"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/app_versao"
+            android:textColor="#44FFFFFF"
+            android:textSize="12sp"
+            android:gravity="right"
+            android:layout_marginTop="2dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:clickable="true" />
+
+    </LinearLayout>
+
+</LinearLayout>

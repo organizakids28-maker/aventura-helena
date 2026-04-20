@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1A0033">
+
+    <!-- ══════════════════════════════════════
+         TELA DE SELEÇÃO DE DIFICULDADE
+    ══════════════════════════════════════ -->
+    <LinearLayout
+        android:id="@+id/ll_selecao"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="32dp"
+        android:visibility="visible">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Jogo da Memoria"
+            android:textColor="#FFD700"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Escolha a dificuldade:"
+            android:textColor="#E1BEE7"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_marginBottom="32dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <!-- FÁCIL -->
+            <Button
+                android:id="@+id/btn_4x4"
+                android:layout_width="0dp"
+                android:layout_height="160dp"
+                android:layout_weight="1"
+                android:text="4 x 4\n\nFACIL\n8 pares"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:background="@drawable/btn_facil"
+                android:layout_marginRight="16dp" />
+
+            <!-- MÉDIO -->
+            <Button
+                android:id="@+id/btn_6x6"
+                android:layout_width="0dp"
+                android:layout_height="160dp"
+                android:layout_weight="1"
+                android:text="4 x 6\n\nMEDIO\n12 pares"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:background="@drawable/btn_medio"
+                android:layout_marginRight="16dp" />
+
+            <!-- DIFÍCIL -->
+            <Button
+                android:id="@+id/btn_8x8"
+                android:layout_width="0dp"
+                android:layout_height="160dp"
+                android:layout_weight="1"
+                android:text="6 x 6\n\nDIFICIL\n18 pares"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:background="@drawable/btn_dificil" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- ══════════════════════════════════════
+         TELA DO JOGO
+    ══════════════════════════════════════ -->
+    <LinearLayout
+        android:id="@+id/ll_jogo"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="6dp">
+
+            <TextView
+                android:id="@+id/tv_titulo_memoria"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Jogo da Memoria"
+                android:textColor="#FFD700"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_placar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pares: 0 / 0"
+                android:textColor="#E1BEE7"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/grid_cartas"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical" />
+
+    </LinearLayout>
+
+</FrameLayout>
